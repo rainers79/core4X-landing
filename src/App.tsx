@@ -73,11 +73,11 @@ const Hero: React.FC = () => {
           Alpha coming soon
         </div>
 
-        <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tighter leading-tight mb-6 break-words">
-          Vereinsmanagement
-          <br />
-          <span className="text-[#B5A47A]">neu gedacht.</span>
-        </h1>
+<h1 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter leading-tight mb-6">
+  Vereins-{'\u00AD'}management
+  <br />
+  <span className="text-[#B5A47A]">neu gedacht.</span>
+</h1>
 
         <p className="text-base md:text-xl text-black/60 font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
           coreV ist die moderne All-in-One App für österreichische Vereine —
