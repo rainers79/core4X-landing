@@ -10,6 +10,21 @@ interface PreregisterForm {
   company: string
 }
 
+const Modal: React.FC<{ title: string; onClose: () => void; children: React.ReactNode }> = ({ title, onClose, children }) => (
+  <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-4 sm:pb-0">
+    <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+    <div className="relative bg-white rounded-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto p-6 z-10">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-black">{title}</h3>
+        <button onClick={onClose} className="text-black/40 hover:text-black text-2xl font-black leading-none">×</button>
+      </div>
+      <div className="text-sm text-black/70 leading-relaxed space-y-3">
+        {children}
+      </div>
+    </div>
+  </div>
+)
+
 const Nav: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -39,10 +54,7 @@ const Nav: React.FC = () => {
           Jetzt vormerken
         </button>
 
-        <button
-          className="md:hidden p-2"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
+        <button className="md:hidden p-2" onClick={() => setMenuOpen(!menuOpen)}>
           <div className="w-5 h-0.5 bg-black mb-1" />
           <div className="w-5 h-0.5 bg-black mb-1" />
           <div className="w-5 h-0.5 bg-black" />
@@ -73,11 +85,11 @@ const Hero: React.FC = () => {
           Alpha coming soon
         </div>
 
-<h1 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter leading-tight mb-6">
-  Vereins-{'\u00AD'}management
-  <br />
-  <span className="text-[#B5A47A]">neu gedacht.</span>
-</h1>
+        <h1 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter leading-tight mb-6">
+          Vereins-management
+          <br />
+          <span className="text-[#B5A47A]">neu gedacht.</span>
+        </h1>
 
         <p className="text-base md:text-xl text-black/60 font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
           coreV ist die moderne All-in-One App für österreichische Vereine —
@@ -215,7 +227,6 @@ const Preise: React.FC = () => (
             Immer verfügbar
           </div>
         </div>
-
         <div className="bg-[#1A1A1A] rounded-2xl border border-white/5 p-6 md:p-8 text-white">
           <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-2">Pro</div>
           <div className="text-4xl font-black mb-1">€10</div>
@@ -316,7 +327,6 @@ const Vormerken: React.FC = () => {
                 />
               </div>
             </div>
-
             <div>
               <label className="text-xs font-black uppercase tracking-wider text-black/40 mb-1 block">E-Mail *</label>
               <input
@@ -328,7 +338,6 @@ const Vormerken: React.FC = () => {
                 className="w-full px-4 py-3 rounded-xl border-2 border-transparent bg-white font-medium focus:border-[#B5A47A] outline-none"
               />
             </div>
-
             <div>
               <label className="text-xs font-black uppercase tracking-wider text-black/40 mb-1 block">Telefon</label>
               <input
@@ -339,7 +348,6 @@ const Vormerken: React.FC = () => {
                 className="w-full px-4 py-3 rounded-xl border-2 border-transparent bg-white font-medium focus:border-[#B5A47A] outline-none"
               />
             </div>
-
             <div>
               <label className="text-xs font-black uppercase tracking-wider text-black/40 mb-1 block">Verein / Firma</label>
               <input
@@ -350,13 +358,11 @@ const Vormerken: React.FC = () => {
                 className="w-full px-4 py-3 rounded-xl border-2 border-transparent bg-white font-medium focus:border-[#B5A47A] outline-none"
               />
             </div>
-
             {error && (
               <div className="px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm font-semibold">
                 {error}
               </div>
             )}
-
             <button
               onClick={handleSubmit}
               disabled={loading}
@@ -364,7 +370,6 @@ const Vormerken: React.FC = () => {
             >
               {loading ? 'Wird gesendet...' : 'Für Alpha vormerken'}
             </button>
-
             <p className="text-xs text-black/30 text-center">
               Keine Zahlung erforderlich. Nur eine Vorankündigung.
             </p>
@@ -375,25 +380,10 @@ const Vormerken: React.FC = () => {
   )
 }
 
-const Footer: React.FC = () => (
-  <footer className="py-12 px-5 border-t border-black/5">
-    <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
-      <div className="text-xl font-black tracking-tight">
-        core<span className="text-[#B5A47A]">V</span>
-        <span className="text-xs font-bold text-black/30 ml-2 uppercase tracking-widest">by core4X</span>
-      </div>
-      <div className="text-xs text-black/30 font-medium">
-        {new Date().getFullYear()} core4X. Alle Rechte vorbehalten.
-      </div>
-      <div className="flex gap-6">
-        <button className="text-xs font-semibold text-black/40 hover:text-black">Impressum</button>
-        <button className="text-xs font-semibold text-black/40 hover:text-black">Datenschutz</button>
-      </div>
-    </div>
-  </footer>
-)
-
 const App: React.FC = () => {
+  const [showImpressum, setShowImpressum] = useState(false)
+  const [showDatenschutz, setShowDatenschutz] = useState(false)
+
   return (
     <div className="min-h-screen overflow-x-hidden">
       <Nav />
@@ -402,7 +392,88 @@ const App: React.FC = () => {
       <Module />
       <Preise />
       <Vormerken />
-      <Footer />
+
+      <footer className="py-12 px-5 border-t border-black/5">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+          <div className="text-xl font-black tracking-tight">
+            core<span className="text-[#B5A47A]">V</span>
+            <span className="text-xs font-bold text-black/30 ml-2 uppercase tracking-widest">by core4X</span>
+          </div>
+          <div className="text-xs text-black/30 font-medium">
+            {new Date().getFullYear()} core4X. Alle Rechte vorbehalten.
+          </div>
+          <div className="flex gap-6">
+            <button
+              onClick={() => setShowImpressum(true)}
+              className="text-xs font-semibold text-black/40 hover:text-black"
+            >
+              Impressum
+            </button>
+            <button
+              onClick={() => setShowDatenschutz(true)}
+              className="text-xs font-semibold text-black/40 hover:text-black"
+            >
+              Datenschutz
+            </button>
+          </div>
+        </div>
+      </footer>
+
+      {showImpressum && (
+        <Modal title="Impressum" onClose={() => setShowImpressum(false)}>
+          <p className="font-bold">Angaben gemäß § 5 ECG</p>
+          <p>
+            Schmidt Rainer<br />
+            Friedrich Schmolka-Strasse 12<br />
+            2542 Kottingbrunn<br />
+            Österreich
+          </p>
+          <p>
+            E-Mail: rainer@schmidt-kottingbrunn.at<br />
+            Telefon: +43 676 4808464
+          </p>
+          <p>
+            Diese Website wird privat betrieben und dient der Vorstellung des Softwareprodukts coreV im Rahmen des core4X Projekts.
+          </p>
+        </Modal>
+      )}
+
+      {showDatenschutz && (
+        <Modal title="Datenschutzerklärung" onClose={() => setShowDatenschutz(false)}>
+          <p className="font-bold">Verantwortlicher</p>
+          <p>
+            Schmidt Rainer<br />
+            Friedrich Schmolka-Strasse 12<br />
+            2542 Kottingbrunn<br />
+            rainer@schmidt-kottingbrunn.at
+          </p>
+
+          <p className="font-bold">Welche Daten wir sammeln</p>
+          <p>
+            Im Rahmen der Alpha-Voranmeldung erfassen wir folgende Daten: Vorname, Nachname, E-Mail-Adresse, Telefonnummer und Vereins- bzw. Firmenname. Die Angabe dieser Daten erfolgt freiwillig.
+          </p>
+
+          <p className="font-bold">Zweck der Verarbeitung</p>
+          <p>
+            Die erhobenen Daten werden ausschließlich verwendet um Sie über den Start der Alpha-Phase und weitere Entwicklungen der core4X Produktfamilie zu informieren.
+          </p>
+
+          <p className="font-bold">Speicherung</p>
+          <p>
+            Ihre Daten werden auf einem Server von World4You Internet Services GmbH in Österreich gespeichert.
+          </p>
+
+          <p className="font-bold">Ihre Rechte</p>
+          <p>
+            Sie haben jederzeit das Recht auf Auskunft über Ihre gespeicherten Daten, sowie das Recht auf Berichtigung, Löschung oder Einschränkung der Verarbeitung. Bitte wenden Sie sich dazu an: rainer@schmidt-kottingbrunn.at
+          </p>
+
+          <p className="font-bold">Keine Weitergabe</p>
+          <p>
+            Ihre Daten werden nicht an Dritte weitergegeben.
+          </p>
+        </Modal>
+      )}
     </div>
   )
 }
