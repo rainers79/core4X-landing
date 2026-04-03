@@ -2,10 +2,6 @@ import React, { useState } from 'react'
 
 const API_BASE = 'https://api.gug-verein.at/wp-json/core4x/v1'
 
-/* =====================================================
-   TYPES
-===================================================== */
-
 interface PreregisterForm {
   first_name: string
   last_name: string
@@ -14,19 +10,15 @@ interface PreregisterForm {
   company: string
 }
 
-/* =====================================================
-   NAVIGATION
-===================================================== */
-
 const Nav: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#F6F1E4]/90 backdrop-blur-sm border-b border-black/5">
       <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-xl font-black tracking-tight">core<span className="text-[#B5A47A]">V</span></span>
-        </div>
+        <span className="text-xl font-black tracking-tight">
+          core<span className="text-[#B5A47A]">V</span>
+        </span>
 
         <div className="hidden md:flex items-center gap-8">
           <a href="#features" className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Features</a>
@@ -35,14 +27,12 @@ const Nav: React.FC = () => {
           <a href="#vormerken" className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Alpha</a>
         </div>
 
-        <div className="hidden md:flex items-center gap-3">
-          
-            href="#vormerken"
-            className="px-4 py-2 rounded-xl bg-[#B5A47A] text-black text-sm font-black uppercase tracking-wide"
-          >
-            Jetzt vormerken
-          </a>
-        </div>
+        
+          href="#vormerken"
+          className="hidden md:block px-4 py-2 rounded-xl bg-[#B5A47A] text-black text-sm font-black uppercase tracking-wide"
+        >
+          Jetzt vormerken
+        </a>
 
         <button
           className="md:hidden p-2"
@@ -65,10 +55,6 @@ const Nav: React.FC = () => {
     </nav>
   )
 }
-
-/* =====================================================
-   HERO
-===================================================== */
 
 const Hero: React.FC = () => (
   <section className="min-h-screen flex items-center justify-center px-5 pt-16">
@@ -121,41 +107,13 @@ const Hero: React.FC = () => (
   </section>
 )
 
-/* =====================================================
-   FEATURES
-===================================================== */
-
 const features = [
-  {
-    icon: '👥',
-    title: 'Mitgliederverwaltung',
-    description: 'Alle Mitglieder zentral verwalten. Profile, Rollen, Kontaktdaten — alles an einem Ort.'
-  },
-  {
-    icon: '🧾',
-    title: 'Kassasystem (POS)',
-    description: 'Integriertes Boniersystem für Veranstaltungen. Schnell, mobil, übersichtlich.'
-  },
-  {
-    icon: '📅',
-    title: 'Kalender & Events',
-    description: 'Veranstaltungen planen, Termine koordinieren und das Team auf dem Laufenden halten.'
-  },
-  {
-    icon: '✅',
-    title: 'Aufgaben & Teams',
-    description: 'Aufgaben zuweisen, Fortschritt verfolgen und Kernteams für Projekte zusammenstellen.'
-  },
-  {
-    icon: '💬',
-    title: 'Chat & Kommunikation',
-    description: 'Interner Chat für das Team — direkt in der App, kein externes Tool nötig.'
-  },
-  {
-    icon: '📊',
-    title: 'Umfragen & Abstimmungen',
-    description: 'Schnell Meinungen einholen und Entscheidungen demokratisch treffen.'
-  },
+  { icon: '👥', title: 'Mitgliederverwaltung', description: 'Alle Mitglieder zentral verwalten. Profile, Rollen, Kontaktdaten — alles an einem Ort.' },
+  { icon: '🧾', title: 'Kassasystem (POS)', description: 'Integriertes Boniersystem für Veranstaltungen. Schnell, mobil, übersichtlich.' },
+  { icon: '📅', title: 'Kalender & Events', description: 'Veranstaltungen planen, Termine koordinieren und das Team auf dem Laufenden halten.' },
+  { icon: '✅', title: 'Aufgaben & Teams', description: 'Aufgaben zuweisen, Fortschritt verfolgen und Kernteams für Projekte zusammenstellen.' },
+  { icon: '💬', title: 'Chat & Kommunikation', description: 'Interner Chat für das Team — direkt in der App, kein externes Tool nötig.' },
+  { icon: '📊', title: 'Umfragen & Abstimmungen', description: 'Schnell Meinungen einholen und Entscheidungen demokratisch treffen.' },
 ]
 
 const Features: React.FC = () => (
@@ -165,7 +123,6 @@ const Features: React.FC = () => (
         <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Was coreV kann</div>
         <h2 className="text-4xl md:text-5xl font-black tracking-tighter">Alles was dein Verein braucht.</h2>
       </div>
-
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {features.map((f, i) => (
           <div key={i} className="bg-white rounded-2xl p-6 border border-black/5 shadow-sm">
@@ -178,10 +135,6 @@ const Features: React.FC = () => (
     </div>
   </section>
 )
-
-/* =====================================================
-   MODULE (PLATZHALTER)
-===================================================== */
 
 const modules = [
   { name: 'coreV', desc: 'Vereinsmanagement & POS', status: 'Verfügbar', color: 'bg-green-100 text-green-700' },
@@ -202,10 +155,9 @@ const Module: React.FC = () => (
           coreV ist erst der Anfang. Das core4X Ökosystem wächst — wähle nur die Module die du brauchst.
         </p>
       </div>
-
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {modules.map((m, i) => (
-          <div key={i} className="rounded-2xl border border-black/8 p-6 flex items-start gap-4">
+          <div key={i} className="rounded-2xl border border-black/10 p-6 flex items-start gap-4">
             <div className="w-12 h-12 rounded-xl bg-[#F6F1E4] flex items-center justify-center flex-shrink-0">
               <span className="text-sm font-black text-[#B5A47A]">{m.name}</span>
             </div>
@@ -225,10 +177,6 @@ const Module: React.FC = () => (
   </section>
 )
 
-/* =====================================================
-   PREISE (PLATZHALTER)
-===================================================== */
-
 const Preise: React.FC = () => (
   <section id="preise" className="py-24 px-5">
     <div className="max-w-4xl mx-auto">
@@ -239,10 +187,8 @@ const Preise: React.FC = () => (
           Zahlung wird nach der Alpha-Phase freigeschaltet.
         </p>
       </div>
-
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Free */}
-        <div className="bg-white rounded-2xl border border-black/8 p-8">
+        <div className="bg-white rounded-2xl border border-black/10 p-8">
           <div className="text-xs font-black uppercase tracking-widest text-black/40 mb-2">Kostenlos</div>
           <div className="text-4xl font-black mb-1">€0</div>
           <div className="text-sm text-black/40 mb-6">Für immer kostenlos</div>
@@ -258,7 +204,6 @@ const Preise: React.FC = () => (
           </div>
         </div>
 
-        {/* Pro */}
         <div className="bg-[#1A1A1A] rounded-2xl border border-white/5 p-8 text-white">
           <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-2">Pro</div>
           <div className="text-4xl font-black mb-1">€10</div>
@@ -278,10 +223,6 @@ const Preise: React.FC = () => (
     </div>
   </section>
 )
-
-/* =====================================================
-   VORANMELDUNG
-===================================================== */
 
 const Vormerken: React.FC = () => {
   const [form, setForm] = useState<PreregisterForm>({
@@ -304,23 +245,16 @@ const Vormerken: React.FC = () => {
       setError('Vorname und E-Mail sind erforderlich.')
       return
     }
-
     setLoading(true)
     setError(null)
-
     try {
       const res = await fetch(`${API_BASE}/preregister`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       })
-
       const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.message || 'Fehler bei der Anmeldung.')
-      }
-
+      if (!res.ok) throw new Error(data.message || 'Fehler bei der Anmeldung.')
       setSuccess(true)
     } catch (err: any) {
       setError(err.message || 'Etwas ist schiefgelaufen.')
@@ -429,10 +363,6 @@ const Vormerken: React.FC = () => {
   )
 }
 
-/* =====================================================
-   FOOTER
-===================================================== */
-
 const Footer: React.FC = () => (
   <footer className="py-12 px-5 border-t border-black/5">
     <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
@@ -450,10 +380,6 @@ const Footer: React.FC = () => (
     </div>
   </footer>
 )
-
-/* =====================================================
-   APP
-===================================================== */
 
 const App: React.FC = () => {
   return (
