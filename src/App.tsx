@@ -13,6 +13,11 @@ interface PreregisterForm {
 const Nav: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false)
 
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+    setMenuOpen(false)
+  }
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#F6F1E4]/90 backdrop-blur-sm border-b border-black/5">
       <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
@@ -21,18 +26,18 @@ const Nav: React.FC = () => {
         </span>
 
         <div className="hidden md:flex items-center gap-8">
-          <a href="#features" className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Features</a>
-          <a href="#module" className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Module</a>
-          <a href="#preise" className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Preise</a>
-          <a href="#vormerken" className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Alpha</a>
+          <button onClick={() => scrollTo('features')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Features</button>
+          <button onClick={() => scrollTo('module')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Module</button>
+          <button onClick={() => scrollTo('preise')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Preise</button>
+          <button onClick={() => scrollTo('vormerken')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Alpha</button>
         </div>
 
-        
-          href="#vormerken"
+        <button
+          onClick={() => scrollTo('vormerken')}
           className="hidden md:block px-4 py-2 rounded-xl bg-[#B5A47A] text-black text-sm font-black uppercase tracking-wide"
         >
           Jetzt vormerken
-        </a>
+        </button>
 
         <button
           className="md:hidden p-2"
@@ -46,66 +51,72 @@ const Nav: React.FC = () => {
 
       {menuOpen && (
         <div className="md:hidden bg-[#F6F1E4] border-t border-black/5 px-5 py-4 space-y-3">
-          <a href="#features" onClick={() => setMenuOpen(false)} className="block text-sm font-semibold">Features</a>
-          <a href="#module" onClick={() => setMenuOpen(false)} className="block text-sm font-semibold">Module</a>
-          <a href="#preise" onClick={() => setMenuOpen(false)} className="block text-sm font-semibold">Preise</a>
-          <a href="#vormerken" onClick={() => setMenuOpen(false)} className="block text-sm font-semibold">Alpha vormerken</a>
+          <button onClick={() => scrollTo('features')} className="block text-sm font-semibold">Features</button>
+          <button onClick={() => scrollTo('module')} className="block text-sm font-semibold">Module</button>
+          <button onClick={() => scrollTo('preise')} className="block text-sm font-semibold">Preise</button>
+          <button onClick={() => scrollTo('vormerken')} className="block text-sm font-semibold">Alpha vormerken</button>
         </div>
       )}
     </nav>
   )
 }
 
-const Hero: React.FC = () => (
-  <section className="min-h-screen flex items-center justify-center px-5 pt-16">
-    <div className="max-w-4xl mx-auto text-center">
-      <div className="inline-block px-4 py-1.5 rounded-full bg-[#B5A47A]/20 text-[#9A8A60] text-xs font-black uppercase tracking-widest mb-6">
-        Alpha coming soon
-      </div>
+const Hero: React.FC = () => {
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+  }
 
-      <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none mb-6">
-        Vereinsmanagement<br />
-        <span className="text-[#B5A47A]">neu gedacht.</span>
-      </h1>
-
-      <p className="text-lg md:text-xl text-black/60 font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
-        coreV ist die moderne All-in-One App für österreichische Vereine —
-        von der Mitgliederverwaltung bis zum integrierten Kassasystem.
-        Einfach, schnell, mobil.
-      </p>
-
-      <div className="flex flex-col sm:flex-row gap-4 justify-center">
-        
-          href="#vormerken"
-          className="px-8 py-4 rounded-2xl bg-[#1A1A1A] text-white text-sm font-black uppercase tracking-wide"
-        >
-          Alpha vormerken
-        </a>
-        
-          href="#features"
-          className="px-8 py-4 rounded-2xl bg-[#B5A47A]/20 text-black text-sm font-black uppercase tracking-wide"
-        >
-          Mehr erfahren
-        </a>
-      </div>
-
-      <div className="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto">
-        <div className="text-center">
-          <div className="text-3xl font-black">125k+</div>
-          <div className="text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Vereine in AT</div>
+  return (
+    <section className="min-h-screen flex items-center justify-center px-5 pt-16">
+      <div className="max-w-4xl mx-auto text-center">
+        <div className="inline-block px-4 py-1.5 rounded-full bg-[#B5A47A]/20 text-[#9A8A60] text-xs font-black uppercase tracking-widest mb-6">
+          Alpha coming soon
         </div>
-        <div className="text-center">
-          <div className="text-3xl font-black">1 App</div>
-          <div className="text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Alles drin</div>
+
+        <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none mb-6">
+          Vereinsmanagement<br />
+          <span className="text-[#B5A47A]">neu gedacht.</span>
+        </h1>
+
+        <p className="text-lg md:text-xl text-black/60 font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
+          coreV ist die moderne All-in-One App für österreichische Vereine —
+          von der Mitgliederverwaltung bis zum integrierten Kassasystem.
+          Einfach, schnell, mobil.
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <button
+            onClick={() => scrollTo('vormerken')}
+            className="px-8 py-4 rounded-2xl bg-[#1A1A1A] text-white text-sm font-black uppercase tracking-wide"
+          >
+            Alpha vormerken
+          </button>
+          <button
+            onClick={() => scrollTo('features')}
+            className="px-8 py-4 rounded-2xl bg-[#B5A47A]/20 text-black text-sm font-black uppercase tracking-wide"
+          >
+            Mehr erfahren
+          </button>
         </div>
-        <div className="text-center">
-          <div className="text-3xl font-black">€10</div>
-          <div className="text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Pro Monat</div>
+
+        <div className="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto">
+          <div className="text-center">
+            <div className="text-3xl font-black">125k+</div>
+            <div className="text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Vereine in AT</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-black">1 App</div>
+            <div className="text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Alles drin</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-black">€10</div>
+            <div className="text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Pro Monat</div>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
-)
+    </section>
+  )
+}
 
 const features = [
   { icon: '👥', title: 'Mitgliederverwaltung', description: 'Alle Mitglieder zentral verwalten. Profile, Rollen, Kontaktdaten — alles an einem Ort.' },
@@ -371,11 +382,11 @@ const Footer: React.FC = () => (
         <span className="text-xs font-bold text-black/30 ml-2 uppercase tracking-widest">by core4X</span>
       </div>
       <div className="text-xs text-black/30 font-medium">
-        © {new Date().getFullYear()} core4X. Alle Rechte vorbehalten.
+        {new Date().getFullYear()} core4X. Alle Rechte vorbehalten.
       </div>
       <div className="flex gap-6">
-        <a href="#" className="text-xs font-semibold text-black/40 hover:text-black">Impressum</a>
-        <a href="#" className="text-xs font-semibold text-black/40 hover:text-black">Datenschutz</a>
+        <button className="text-xs font-semibold text-black/40 hover:text-black">Impressum</button>
+        <button className="text-xs font-semibold text-black/40 hover:text-black">Datenschutz</button>
       </div>
     </div>
   </footer>
