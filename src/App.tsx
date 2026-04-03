@@ -67,50 +67,51 @@ const Hero: React.FC = () => {
   }
 
   return (
-    <section className="min-h-screen flex items-center justify-center px-5 pt-16">
-      <div className="max-w-4xl mx-auto text-center">
+    <section className="min-h-screen flex items-center justify-center px-5 pt-16 overflow-hidden">
+      <div className="max-w-4xl mx-auto text-center w-full">
         <div className="inline-block px-4 py-1.5 rounded-full bg-[#B5A47A]/20 text-[#9A8A60] text-xs font-black uppercase tracking-widest mb-6">
           Alpha coming soon
         </div>
 
-        <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none mb-6">
-          Vereinsmanagement<br />
+        <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tighter leading-tight mb-6 break-words">
+          Vereinsmanagement
+          <br />
           <span className="text-[#B5A47A]">neu gedacht.</span>
         </h1>
 
-        <p className="text-lg md:text-xl text-black/60 font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
+        <p className="text-base md:text-xl text-black/60 font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
           coreV ist die moderne All-in-One App für österreichische Vereine —
           von der Mitgliederverwaltung bis zum integrierten Kassasystem.
           Einfach, schnell, mobil.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center px-4">
           <button
             onClick={() => scrollTo('vormerken')}
-            className="px-8 py-4 rounded-2xl bg-[#1A1A1A] text-white text-sm font-black uppercase tracking-wide"
+            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#1A1A1A] text-white text-sm font-black uppercase tracking-wide"
           >
             Alpha vormerken
           </button>
           <button
             onClick={() => scrollTo('features')}
-            className="px-8 py-4 rounded-2xl bg-[#B5A47A]/20 text-black text-sm font-black uppercase tracking-wide"
+            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#B5A47A]/20 text-black text-sm font-black uppercase tracking-wide"
           >
             Mehr erfahren
           </button>
         </div>
 
-        <div className="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto">
+        <div className="mt-16 grid grid-cols-3 gap-4 max-w-lg mx-auto px-4">
           <div className="text-center">
-            <div className="text-3xl font-black">125k+</div>
-            <div className="text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Vereine in AT</div>
+            <div className="text-2xl sm:text-3xl font-black">125k+</div>
+            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Vereine in AT</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-black">1 App</div>
-            <div className="text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Alles drin</div>
+            <div className="text-2xl sm:text-3xl font-black">1 App</div>
+            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Alles drin</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-black">€10</div>
-            <div className="text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Pro Monat</div>
+            <div className="text-2xl sm:text-3xl font-black">€10</div>
+            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Pro Monat</div>
           </div>
         </div>
       </div>
@@ -132,7 +133,7 @@ const Features: React.FC = () => (
     <div className="max-w-6xl mx-auto">
       <div className="text-center mb-16">
         <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Was coreV kann</div>
-        <h2 className="text-4xl md:text-5xl font-black tracking-tighter">Alles was dein Verein braucht.</h2>
+        <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Alles was dein Verein braucht.</h2>
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {features.map((f, i) => (
@@ -161,25 +162,25 @@ const Module: React.FC = () => (
     <div className="max-w-6xl mx-auto">
       <div className="text-center mb-16">
         <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Das Ökosystem</div>
-        <h2 className="text-4xl md:text-5xl font-black tracking-tighter">core4X Module.</h2>
-        <p className="mt-4 text-black/50 font-medium max-w-xl mx-auto">
+        <h2 className="text-3xl md:text-5xl font-black tracking-tighter">core4X Module.</h2>
+        <p className="mt-4 text-black/50 font-medium max-w-xl mx-auto text-sm md:text-base">
           coreV ist erst der Anfang. Das core4X Ökosystem wächst — wähle nur die Module die du brauchst.
         </p>
       </div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {modules.map((m, i) => (
-          <div key={i} className="rounded-2xl border border-black/10 p-6 flex items-start gap-4">
+          <div key={i} className="rounded-2xl border border-black/10 p-5 flex items-start gap-4">
             <div className="w-12 h-12 rounded-xl bg-[#F6F1E4] flex items-center justify-center flex-shrink-0">
-              <span className="text-sm font-black text-[#B5A47A]">{m.name}</span>
+              <span className="text-xs font-black text-[#B5A47A]">{m.name}</span>
             </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="font-black">{m.name}</h3>
-                <span className={`text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full ${m.color}`}>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-1 gap-2">
+                <h3 className="font-black text-sm">{m.name}</h3>
+                <span className={`text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full flex-shrink-0 ${m.color}`}>
                   {m.status}
                 </span>
               </div>
-              <p className="text-sm text-black/50">{m.desc}</p>
+              <p className="text-xs text-black/50">{m.desc}</p>
             </div>
           </div>
         ))}
@@ -193,13 +194,13 @@ const Preise: React.FC = () => (
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-16">
         <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Transparent & fair</div>
-        <h2 className="text-4xl md:text-5xl font-black tracking-tighter">Einfache Preise.</h2>
-        <p className="mt-4 text-black/50 font-medium">
+        <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Einfache Preise.</h2>
+        <p className="mt-4 text-black/50 font-medium text-sm md:text-base">
           Zahlung wird nach der Alpha-Phase freigeschaltet.
         </p>
       </div>
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-2xl border border-black/10 p-8">
+        <div className="bg-white rounded-2xl border border-black/10 p-6 md:p-8">
           <div className="text-xs font-black uppercase tracking-widest text-black/40 mb-2">Kostenlos</div>
           <div className="text-4xl font-black mb-1">€0</div>
           <div className="text-sm text-black/40 mb-6">Für immer kostenlos</div>
@@ -215,7 +216,7 @@ const Preise: React.FC = () => (
           </div>
         </div>
 
-        <div className="bg-[#1A1A1A] rounded-2xl border border-white/5 p-8 text-white">
+        <div className="bg-[#1A1A1A] rounded-2xl border border-white/5 p-6 md:p-8 text-white">
           <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-2">Pro</div>
           <div className="text-4xl font-black mb-1">€10</div>
           <div className="text-sm text-white/40 mb-6">Pro Monat</div>
@@ -279,8 +280,8 @@ const Vormerken: React.FC = () => {
       <div className="max-w-xl mx-auto">
         <div className="text-center mb-12">
           <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Alpha-Phase</div>
-          <h2 className="text-4xl md:text-5xl font-black tracking-tighter">Jetzt vormerken.</h2>
-          <p className="mt-4 text-black/50 font-medium">
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Jetzt vormerken.</h2>
+          <p className="mt-4 text-black/50 font-medium text-sm md:text-base">
             Sei dabei wenn coreV startet. Alpha-Tester bekommen exklusiven Früh-Zugang und helfen das Produkt zu formen.
           </p>
         </div>
@@ -292,8 +293,8 @@ const Vormerken: React.FC = () => {
             <p className="text-black/50">Wir melden uns sobald die Alpha startet.</p>
           </div>
         ) : (
-          <div className="bg-[#F6F1E4] rounded-2xl p-8 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+          <div className="bg-[#F6F1E4] rounded-2xl p-6 md:p-8 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-black uppercase tracking-wider text-black/40 mb-1 block">Vorname *</label>
                 <input
@@ -376,7 +377,7 @@ const Vormerken: React.FC = () => {
 
 const Footer: React.FC = () => (
   <footer className="py-12 px-5 border-t border-black/5">
-    <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+    <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
       <div className="text-xl font-black tracking-tight">
         core<span className="text-[#B5A47A]">V</span>
         <span className="text-xs font-bold text-black/30 ml-2 uppercase tracking-widest">by core4X</span>
@@ -394,7 +395,7 @@ const Footer: React.FC = () => (
 
 const App: React.FC = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-hidden">
       <Nav />
       <Hero />
       <Features />
