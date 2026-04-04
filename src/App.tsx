@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const API_BASE = 'https://api.schmidt-kottingbrunn.at/api/wp-json/core4x/v1'
+const API_BASE = 'https://schmidt-kottingbrunn.at/api/wp-json/core4x/v1'
 
 interface PreregisterForm {
   first_name: string
