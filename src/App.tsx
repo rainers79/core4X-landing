@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
-const API_BASE = 'https://schmidt-kottingbrunn.at/api/wp-json/core4x/v1'
+const API_BASE = 'https://api.schmidt-kottingbrunn.at/wp-json/core4x/v1'
 
 const BASIC_DOWNLOAD_URL = '#vormerken'
 const PREMIUM_CHECKOUT_URL = '#vormerken'
@@ -238,7 +238,11 @@ const Vormerken: React.FC = () => {
       if (!res.ok) throw new Error(data.message || 'Fehler bei der Anmeldung.')
       setSuccess(true)
     } catch (err: any) {
-      setError(err.message || 'Etwas ist schiefgelaufen.')
+      if (err instanceof TypeError) {
+        setError('Netzwerk- oder CORS-Fehler. Bitte API-URL und CORS prüfen.')
+      } else {
+        setError(err.message || 'Etwas ist schiefgelaufen.')
+      }
     } finally {
       setLoading(false)
     }
@@ -424,7 +428,11 @@ const Preise: React.FC = () => {
         setCatalog(data)
       } catch (err: any) {
         if (!active) return
-        setCatalogError(err?.message || 'Billing-Katalog konnte nicht geladen werden.')
+        if (err instanceof TypeError) {
+          setCatalogError('Netzwerk- oder CORS-Fehler. Bitte API-URL und CORS prüfen.')
+        } else {
+          setCatalogError(err?.message || 'Billing-Katalog konnte nicht geladen werden.')
+        }
       } finally {
         if (active) {
           setCatalogLoading(false)
@@ -472,7 +480,11 @@ const Preise: React.FC = () => {
         setQuote(data)
       } catch (err: any) {
         if (!active) return
-        setQuoteError(err?.message || 'Preisberechnung konnte nicht geladen werden.')
+        if (err instanceof TypeError) {
+          setQuoteError('Netzwerk- oder CORS-Fehler. Bitte API-URL und CORS prüfen.')
+        } else {
+          setQuoteError(err?.message || 'Preisberechnung konnte nicht geladen werden.')
+        }
       } finally {
         if (active) {
           setQuoteLoading(false)
