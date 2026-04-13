@@ -1,16 +1,10 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 const API_BASE = 'https://schmidt-kottingbrunn.at/api/wp-json/core4x/v1'
 
 const BASIC_DOWNLOAD_URL = '#vormerken'
 const PREMIUM_CHECKOUT_URL = '#vormerken'
 const SPECIALMODULE_CHECKOUT_URL = '#vormerken'
-
-const PREMIUM_MONTHLY_PRICE = 10.99
-const PREMIUM_YEARLY_MONTHLY_PRICE = 9.99
-const SPECIAL_MODULE_MONTHLY_PRICE = 5.99
-const SPECIAL_MODULE_YEARLY_MONTHLY_PRICE = 4.99
-const PREMIUM_SPECIAL_YEARLY_DISCOUNT = 0.15
 
 interface PreregisterForm {
   first_name: string
@@ -23,29 +17,61 @@ interface PreregisterForm {
 type BillingCycle = 'monthly' | 'yearly'
 type PackageType = 'basic' | 'premium'
 
-type SpecialModuleOption = {
-  id: string
+interface BillingCatalogProduct {
+  product_key: string
+  product_type: 'base' | 'addon'
   name: string
   description: string
+  is_special: boolean
+  prices: {
+    monthly_cents: number
+    yearly_monthly_cents: number
+  }
 }
 
-const specialModuleOptions: SpecialModuleOption[] = [
-  {
-    id: 'fishing',
-    name: 'Fangstatistik',
-    description: 'Spezialmodul für Fischerei- und Angelvereine.',
-  },
-  {
-    id: 'business',
-    name: 'Business-Modul',
-    description: 'Spezialmodul für erweiterte geschäftliche Anforderungen.',
-  },
-  {
-    id: 'territory',
-    name: 'Reviermodul',
-    description: 'Spezialmodul für Revier- und Gebietsverwaltung.',
-  },
-]
+interface BillingCatalogResponse {
+  success: boolean
+  currency: string
+  discounts: {
+    premium_special_yearly_percent: number
+  }
+  packages: BillingCatalogProduct[]
+  special_modules: BillingCatalogProduct[]
+}
+
+interface BillingQuoteLineItem {
+  product_key: string
+  name: string
+  product_type: 'base' | 'addon'
+  billing_cycle: BillingCycle
+  unit_amount_cents: number
+  quantity: number
+  line_total_cents: number
+}
+
+interface BillingQuoteResponse {
+  success: boolean
+  package_key: PackageType
+  billing_cycle: BillingCycle
+  currency: string
+  selected_special_modules: string[]
+  discount_percent: number
+  line_items: BillingQuoteLineItem[]
+  pricing: {
+    base_monthly_cents: number
+    special_modules_monthly_cents: number
+    subtotal_monthly_cents: number
+    discount_monthly_cents: number
+    total_monthly_cents: number
+    billed_total_cents: number
+    monthly_display_cents: number
+  }
+  entitlements: {
+    plan: string
+    standard_module_keys: string[]
+    special_module_keys: string[]
+  }
+}
 
 const formatPrice = (value: number): string =>
   new Intl.NumberFormat('de-AT', {
@@ -54,6 +80,8 @@ const formatPrice = (value: number): string =>
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value)
+
+const formatPriceFromCents = (valueCents: number): string => formatPrice((valueCents || 0) / 100)
 
 const scrollToSection = (id: string) => {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
@@ -301,9 +329,9 @@ const Features: React.FC = () => (
 
 const modules = [
   { name: 'coreV', desc: 'Standardmodule für Vereinsmanagement, Kommunikation und POS.', status: 'Verfügbar', color: 'bg-green-100 text-green-700' },
-  { name: 'Fangstatistik', desc: 'Spezialmodul für Fischerei- und Angelvereine.', status: '5,99 € / 4,99 €', color: 'bg-[#F6F1E4] text-[#9A8A60]' },
-  { name: 'Business', desc: 'Spezialmodul für erweiterte geschäftliche Anforderungen.', status: '5,99 € / 4,99 €', color: 'bg-[#F6F1E4] text-[#9A8A60]' },
-  { name: 'Revier', desc: 'Spezialmodul für Revier- und Gebietsverwaltung.', status: '5,99 € / 4,99 €', color: 'bg-[#F6F1E4] text-[#9A8A60]' },
+  { name: 'Fangstatistik', desc: 'Spezialmodul für Fischerei- und Angelvereine.', status: 'Separat', color: 'bg-[#F6F1E4] text-[#9A8A60]' },
+  { name: 'Business', desc: 'Spezialmodul für erweiterte geschäftliche Anforderungen.', status: 'Separat', color: 'bg-[#F6F1E4] text-[#9A8A60]' },
+  { name: 'Revier', desc: 'Spezialmodul für Revier- und Gebietsverwaltung.', status: 'Separat', color: 'bg-[#F6F1E4] text-[#9A8A60]' },
 ]
 
 const Module: React.FC = () => (
@@ -363,6 +391,118 @@ const Preise: React.FC = () => {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly')
   const [selectedPackage, setSelectedPackage] = useState<PackageType>('basic')
   const [selectedSpecialModules, setSelectedSpecialModules] = useState<string[]>([])
+  const [catalog, setCatalog] = useState<BillingCatalogResponse | null>(null)
+  const [catalogLoading, setCatalogLoading] = useState(true)
+  const [catalogError, setCatalogError] = useState<string | null>(null)
+  const [quote, setQuote] = useState<BillingQuoteResponse | null>(null)
+  const [quoteLoading, setQuoteLoading] = useState(false)
+  const [quoteError, setQuoteError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+
+    const loadCatalog = async () => {
+      setCatalogLoading(true)
+      setCatalogError(null)
+
+      try {
+        const res = await fetch(`${API_BASE}/billing/catalog`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const data = await res.json()
+
+        if (!res.ok) {
+          throw new Error(data?.message || 'Billing-Katalog konnte nicht geladen werden.')
+        }
+
+        if (!active) return
+
+        setCatalog(data)
+      } catch (err: any) {
+        if (!active) return
+        setCatalogError(err?.message || 'Billing-Katalog konnte nicht geladen werden.')
+      } finally {
+        if (active) {
+          setCatalogLoading(false)
+        }
+      }
+    }
+
+    loadCatalog()
+
+    return () => {
+      active = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!catalog) return
+
+    let active = true
+
+    const loadQuote = async () => {
+      setQuoteLoading(true)
+      setQuoteError(null)
+
+      try {
+        const res = await fetch(`${API_BASE}/billing/quote`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            package_key: selectedPackage,
+            billing_cycle: billingCycle,
+            special_module_keys: selectedSpecialModules,
+          }),
+        })
+
+        const data = await res.json()
+
+        if (!res.ok) {
+          throw new Error(data?.message || 'Preisberechnung konnte nicht geladen werden.')
+        }
+
+        if (!active) return
+
+        setQuote(data)
+      } catch (err: any) {
+        if (!active) return
+        setQuoteError(err?.message || 'Preisberechnung konnte nicht geladen werden.')
+      } finally {
+        if (active) {
+          setQuoteLoading(false)
+        }
+      }
+    }
+
+    loadQuote()
+
+    return () => {
+      active = false
+    }
+  }, [catalog, selectedPackage, billingCycle, selectedSpecialModules])
+
+  const basicPackage = useMemo(
+    () => catalog?.packages.find((item) => item.product_key === 'basic') || null,
+    [catalog]
+  )
+
+  const premiumPackage = useMemo(
+    () => catalog?.packages.find((item) => item.product_key === 'premium') || null,
+    [catalog]
+  )
+
+  const specialModules = useMemo(
+    () => catalog?.special_modules || [],
+    [catalog]
+  )
+
+  const discountPercent = catalog?.discounts?.premium_special_yearly_percent || 15
 
   const toggleSpecialModule = (moduleId: string) => {
     setSelectedSpecialModules((current) =>
@@ -371,39 +511,6 @@ const Preise: React.FC = () => {
         : [...current, moduleId]
     )
   }
-
-  const calculation = useMemo(() => {
-    const premiumBase =
-      selectedPackage === 'premium'
-        ? billingCycle === 'monthly'
-          ? PREMIUM_MONTHLY_PRICE
-          : PREMIUM_YEARLY_MONTHLY_PRICE
-        : 0
-
-    const specialModuleUnitPrice =
-      billingCycle === 'monthly'
-        ? SPECIAL_MODULE_MONTHLY_PRICE
-        : SPECIAL_MODULE_YEARLY_MONTHLY_PRICE
-
-    const specialModulesSubtotal = selectedSpecialModules.length * specialModuleUnitPrice
-
-    const discount =
-      billingCycle === 'yearly' &&
-      selectedPackage === 'premium' &&
-      selectedSpecialModules.length > 0
-        ? (premiumBase + specialModulesSubtotal) * PREMIUM_SPECIAL_YEARLY_DISCOUNT
-        : 0
-
-    const total = premiumBase + specialModulesSubtotal - discount
-
-    return {
-      premiumBase,
-      specialModuleUnitPrice,
-      specialModulesSubtotal,
-      discount,
-      total,
-    }
-  }, [billingCycle, selectedPackage, selectedSpecialModules])
 
   const primaryActionLabel =
     selectedPackage === 'basic' && selectedSpecialModules.length === 0
@@ -418,6 +525,9 @@ const Preise: React.FC = () => {
       : selectedPackage === 'premium'
         ? PREMIUM_CHECKOUT_URL
         : SPECIALMODULE_CHECKOUT_URL
+
+  const summaryMonthlyCents = quote?.pricing?.monthly_display_cents ?? 0
+  const summaryBilledTotalCents = quote?.pricing?.billed_total_cents ?? 0
 
   return (
     <section id="preise" className="py-24 px-5">
@@ -436,7 +546,9 @@ const Preise: React.FC = () => {
               <div className="text-xs font-black uppercase tracking-widest text-black/40">Basic</div>
               <span className="text-[10px] font-black uppercase tracking-wide px-2 py-1 rounded-full bg-[#F6F1E4] text-[#9A8A60]">Kostenlos</span>
             </div>
-            <div className="text-4xl font-black mb-1">Gratis</div>
+            <div className="text-4xl font-black mb-1">
+              {basicPackage ? formatPriceFromCents(basicPackage.prices.monthly_cents) : 'Gratis'}
+            </div>
             <div className="text-sm text-black/40 mb-6">für den einfachen Einstieg</div>
             <ul className="space-y-3 mb-8">
               {basicFeatures.map((feature, i) => (
@@ -459,9 +571,11 @@ const Preise: React.FC = () => {
               <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A]">Premium</div>
               <span className="text-[10px] font-black uppercase tracking-wide px-2 py-1 rounded-full bg-[#B5A47A] text-black">Ohne Limits</span>
             </div>
-            <div className="text-4xl font-black mb-1">{formatPrice(PREMIUM_MONTHLY_PRICE)}</div>
+            <div className="text-4xl font-black mb-1">
+              {premiumPackage ? formatPriceFromCents(premiumPackage.prices.monthly_cents) : '—'}
+            </div>
             <div className="text-sm text-white/40 mb-6">
-              monatlich · {formatPrice(PREMIUM_YEARLY_MONTHLY_PRICE)} im Jahresabo
+              monatlich · {premiumPackage ? formatPriceFromCents(premiumPackage.prices.yearly_monthly_cents) : '—'} im Jahresabo
             </div>
             <ul className="space-y-3 mb-8">
               {premiumFeatures.map((feature, i) => (
@@ -507,6 +621,18 @@ const Preise: React.FC = () => {
               </div>
             </div>
 
+            {catalogLoading && (
+              <div className="mb-6 rounded-xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-600">
+                Billing-Katalog wird geladen…
+              </div>
+            )}
+
+            {catalogError && (
+              <div className="mb-6 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm font-semibold text-red-700">
+                {catalogError}
+              </div>
+            )}
+
             <div className="grid md:grid-cols-2 gap-4 mb-8">
               <button
                 onClick={() => setSelectedPackage('basic')}
@@ -522,7 +648,9 @@ const Preise: React.FC = () => {
                     Kostenlos
                   </span>
                 </div>
-                <div className="text-3xl font-black mb-2">Gratis</div>
+                <div className="text-3xl font-black mb-2">
+                  {basicPackage ? formatPriceFromCents(basicPackage.prices.monthly_cents) : 'Gratis'}
+                </div>
                 <p className="text-sm text-black/60">
                   Kostenloser Einstieg mit begrenzten Standardfunktionen.
                 </p>
@@ -545,9 +673,13 @@ const Preise: React.FC = () => {
                   </span>
                 </div>
                 <div className="text-3xl font-black mb-2">
-                  {billingCycle === 'monthly'
-                    ? formatPrice(PREMIUM_MONTHLY_PRICE)
-                    : formatPrice(PREMIUM_YEARLY_MONTHLY_PRICE)}
+                  {premiumPackage
+                    ? formatPriceFromCents(
+                        billingCycle === 'monthly'
+                          ? premiumPackage.prices.monthly_cents
+                          : premiumPackage.prices.yearly_monthly_cents
+                      )
+                    : '—'}
                 </div>
                 <p className={`text-sm ${selectedPackage === 'premium' ? 'text-white/70' : 'text-black/60'}`}>
                   Alle Standardmodule ohne Limits. Spezialmodule separat zubuchbar.
@@ -563,9 +695,13 @@ const Preise: React.FC = () => {
                 </div>
                 <div className="text-right">
                   <div className="text-sm font-black">
-                    {billingCycle === 'monthly'
-                      ? `${formatPrice(SPECIAL_MODULE_MONTHLY_PRICE)} / Modul`
-                      : `${formatPrice(SPECIAL_MODULE_YEARLY_MONTHLY_PRICE)} / Modul`}
+                    {specialModules.length > 0
+                      ? `${formatPriceFromCents(
+                          billingCycle === 'monthly'
+                            ? specialModules[0].prices.monthly_cents
+                            : specialModules[0].prices.yearly_monthly_cents
+                        )} / Modul`
+                      : '—'}
                   </div>
                   <div className="text-xs text-black/40">
                     {billingCycle === 'yearly' ? 'im Jahresabo' : 'monatlich'}
@@ -574,13 +710,13 @@ const Preise: React.FC = () => {
               </div>
 
               <div className="space-y-3">
-                {specialModuleOptions.map((module) => {
-                  const isSelected = selectedSpecialModules.includes(module.id)
+                {specialModules.map((module) => {
+                  const isSelected = selectedSpecialModules.includes(module.product_key)
 
                   return (
                     <button
-                      key={module.id}
-                      onClick={() => toggleSpecialModule(module.id)}
+                      key={module.product_key}
+                      onClick={() => toggleSpecialModule(module.product_key)}
                       className={`w-full text-left rounded-2xl border p-4 transition-all ${
                         isSelected ? 'border-[#B5A47A] bg-[#F6F1E4]' : 'border-black/10 bg-white'
                       }`}
@@ -592,9 +728,11 @@ const Preise: React.FC = () => {
                         </div>
                         <div className="flex flex-col items-end gap-2">
                           <span className="text-xs font-black text-black/60">
-                            {billingCycle === 'monthly'
-                              ? formatPrice(SPECIAL_MODULE_MONTHLY_PRICE)
-                              : formatPrice(SPECIAL_MODULE_YEARLY_MONTHLY_PRICE)}
+                            {formatPriceFromCents(
+                              billingCycle === 'monthly'
+                                ? module.prices.monthly_cents
+                                : module.prices.yearly_monthly_cents
+                            )}
                           </span>
                           <span className={`text-[10px] font-black uppercase tracking-wide px-2 py-1 rounded-full ${
                             isSelected ? 'bg-[#B5A47A] text-black' : 'bg-slate-100 text-slate-500'
@@ -614,6 +752,12 @@ const Preise: React.FC = () => {
             <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-2">Zusammenfassung</div>
             <h3 className="text-2xl font-black tracking-tight mb-6">Deine Auswahl</h3>
 
+            {quoteError && (
+              <div className="mb-4 rounded-xl bg-red-500/15 border border-red-500/20 px-4 py-3 text-sm font-semibold text-red-200">
+                {quoteError}
+              </div>
+            )}
+
             <div className="space-y-4 mb-6">
               <div className="flex items-center justify-between gap-3 text-sm">
                 <span className="text-white/60">Paket</span>
@@ -626,18 +770,22 @@ const Preise: React.FC = () => {
               <div className="flex items-center justify-between gap-3 text-sm">
                 <span className="text-white/60">Premium</span>
                 <span className="font-black">
-                  {selectedPackage === 'premium' ? formatPrice(calculation.premiumBase) : formatPrice(0)}
+                  {formatPriceFromCents(quote?.pricing?.base_monthly_cents ?? 0)}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-3 text-sm">
                 <span className="text-white/60">Spezialmodule ({selectedSpecialModules.length})</span>
-                <span className="font-black">{formatPrice(calculation.specialModulesSubtotal)}</span>
+                <span className="font-black">
+                  {formatPriceFromCents(quote?.pricing?.special_modules_monthly_cents ?? 0)}
+                </span>
               </div>
 
-              {calculation.discount > 0 && (
+              {(quote?.pricing?.discount_monthly_cents ?? 0) > 0 && (
                 <div className="flex items-center justify-between gap-3 text-sm">
-                  <span className="text-[#B5A47A]">15 % Kombi-Rabatt</span>
-                  <span className="font-black text-[#B5A47A]">- {formatPrice(calculation.discount)}</span>
+                  <span className="text-[#B5A47A]">{discountPercent} % Kombi-Rabatt</span>
+                  <span className="font-black text-[#B5A47A]">
+                    - {formatPriceFromCents(quote?.pricing?.discount_monthly_cents ?? 0)}
+                  </span>
                 </div>
               )}
             </div>
@@ -646,12 +794,19 @@ const Preise: React.FC = () => {
               <div className="flex items-end justify-between gap-3">
                 <div>
                   <div className="text-xs font-black uppercase tracking-widest text-white/40 mb-2">Gesamt</div>
-                  <div className="text-4xl font-black">{formatPrice(calculation.total)}</div>
+                  <div className="text-4xl font-black">
+                    {quoteLoading ? '…' : formatPriceFromCents(summaryMonthlyCents)}
+                  </div>
                 </div>
                 <div className="text-right text-xs text-white/50 font-semibold">
                   {billingCycle === 'yearly' ? 'pro Monat im Jahresabo' : 'pro Monat'}
                 </div>
               </div>
+              {billingCycle === 'yearly' && (
+                <div className="mt-3 text-sm text-white/60">
+                  Verrechnet gesamt pro Jahr: <span className="font-black text-white">{formatPriceFromCents(summaryBilledTotalCents)}</span>
+                </div>
+              )}
             </div>
 
             <div className="space-y-3">
@@ -670,7 +825,7 @@ const Preise: React.FC = () => {
             </div>
 
             <div className="mt-6 rounded-xl bg-white/5 px-4 py-3 text-xs text-white/70 font-semibold leading-relaxed">
-              Download- und Checkout-Ziele sind aktuell vorbereitet. Die Buttons können später direkt auf echte Download- oder Zahlungslinks gelegt werden.
+              Der Konfigurator verwendet jetzt die Backend-Preislogik. Checkout-Ziele sind weiterhin vorbereitet und können im nächsten Schritt an echte Zahlungsanbieter angebunden werden.
             </div>
           </div>
         </div>
