@@ -98,10 +98,10 @@ const Hero: React.FC = () => {
             Alpha vormerken
           </button>
           <button
-            onClick={() => scrollTo('features')}
+            onClick={() => scrollTo('preise')}
             className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#B5A47A]/20 text-black text-sm font-black uppercase tracking-wide"
           >
-            Mehr erfahren
+            Pakete ansehen
           </button>
         </div>
         <div className="mt-16 grid grid-cols-3 gap-4 max-w-lg mx-auto px-4">
@@ -115,7 +115,7 @@ const Hero: React.FC = () => {
           </div>
           <div className="text-center">
             <div className="text-2xl sm:text-3xl font-black">ab €9,90</div>
-            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Pro Monat</div>
+            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Basic pro Monat</div>
           </div>
         </div>
       </div>
@@ -285,45 +285,81 @@ const Module: React.FC = () => (
   </section>
 )
 
+const basicFeatures = [
+  'Kalender mit vollem Standardzugriff',
+  'Rechnungen immer verfügbar',
+  'Boniersystem mit max. 6 Artikeln',
+  'Boniersystem bis max. €1.500 Umsatz',
+  'Max. 2 Aufgaben pro Projekt',
+  'Max. 2 Einkaufseinträge pro Projekt',
+  'Max. 5 Umfragen pro Projekt',
+  'Max. 1 Projektchat-Gruppe pro Projekt',
+]
+
+const premiumFeatures = [
+  'Alles aus Basic',
+  'Keine Basic-Limits bei Artikeln und Umsatz',
+  'Keine Basic-Limits bei Aufgaben, Einkauf und Umfragen',
+  'Mehrere Projektchat-Gruppen pro Projekt',
+  'Alle Module freischaltbar',
+  'Ideal für größere Vereine und Veranstaltungsbetrieb',
+]
+
 const Preise: React.FC = () => (
   <section id="preise" className="py-24 px-5">
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-5xl mx-auto">
       <div className="text-center mb-16">
         <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Transparent & fair</div>
-        <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Einfache Preise.</h2>
-        <p className="mt-4 text-black/50 font-medium text-sm md:text-base">
-          Zahlung wird nach der Alpha-Phase freigeschaltet.
+        <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Klare Pakete statt Chaos.</h2>
+        <p className="mt-4 text-black/50 font-medium text-sm md:text-base max-w-2xl mx-auto">
+          Die Landingpage ist jetzt auf das aktuelle Lizenzmodell ausgerichtet. Zahlung und Checkout werden nach der Alpha-Phase freigeschaltet.
         </p>
       </div>
+
       <div className="grid md:grid-cols-2 gap-6">
         <div className="bg-white rounded-2xl border border-black/10 p-6 md:p-8">
-          <div className="text-xs font-black uppercase tracking-widest text-black/40 mb-2">Kostenlos</div>
-          <div className="text-4xl font-black mb-1">€0</div>
-          <div className="text-sm text-black/40 mb-6">Für immer kostenlos</div>
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <div className="text-xs font-black uppercase tracking-widest text-black/40">Basic</div>
+            <span className="text-[10px] font-black uppercase tracking-wide px-2 py-1 rounded-full bg-[#F6F1E4] text-[#9A8A60]">Einstieg</span>
+          </div>
+          <div className="text-4xl font-black mb-1">ab €9,90</div>
+          <div className="text-sm text-black/40 mb-6">pro Monat</div>
           <ul className="space-y-3 mb-8">
-            {['Basis Mitgliederverwaltung', 'Lokales Kassasystem', 'Bis zu €5.000 Umsatz', 'Community Chat'].map((f, i) => (
-              <li key={i} className="flex items-center gap-2 text-sm font-medium">
-                <span className="text-green-500">✓</span> {f}
+            {basicFeatures.map((feature, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm font-medium">
+                <span className="text-green-500 mt-0.5">✓</span>
+                <span>{feature}</span>
               </li>
             ))}
           </ul>
-          <div className="w-full py-3 rounded-xl bg-slate-100 text-center text-sm font-black uppercase tracking-wide text-slate-400">
-            Immer verfügbar
+          <div className="rounded-xl bg-slate-100 px-4 py-3 text-xs text-slate-600 font-semibold leading-relaxed mb-4">
+            Basic ist bewusst begrenzt. Das Paket soll klein starten, aber produktiv nutzbar bleiben.
+          </div>
+          <div className="w-full py-3 rounded-xl bg-[#1A1A1A] text-center text-sm font-black uppercase tracking-wide text-white">
+            Zahlung kommt bald
           </div>
         </div>
+
         <div className="bg-[#1A1A1A] rounded-2xl border border-white/5 p-6 md:p-8 text-white">
-          <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-2">Pro</div>
-          <div className="text-4xl font-black mb-1">ab €9,90</div>
-          <div className="text-sm text-white/40 mb-6">Pro Monat</div>
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A]">Premium</div>
+            <span className="text-[10px] font-black uppercase tracking-wide px-2 py-1 rounded-full bg-[#B5A47A] text-black">Volles Paket</span>
+          </div>
+          <div className="text-4xl font-black mb-1">Individuell</div>
+          <div className="text-sm text-white/40 mb-6">für wachsende Communities</div>
           <ul className="space-y-3 mb-8">
-            {['Alles aus Free', 'Unbegrenzter Umsatz', 'Datenbank-Sync', 'Modulares System', 'Statistiken & Berichte', 'E-Mail Support'].map((f, i) => (
-              <li key={i} className="flex items-center gap-2 text-sm font-medium">
-                <span className="text-[#B5A47A]">✓</span> {f}
+            {premiumFeatures.map((feature, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm font-medium">
+                <span className="text-[#B5A47A] mt-0.5">✓</span>
+                <span>{feature}</span>
               </li>
             ))}
           </ul>
+          <div className="rounded-xl bg-white/5 px-4 py-3 text-xs text-white/70 font-semibold leading-relaxed mb-4">
+            Premium wird als Ausbaupaket positioniert. Zusätzliche Integrationen und Erweiterungen können später modular ergänzt werden.
+          </div>
           <div className="w-full py-3 rounded-xl bg-[#B5A47A] text-center text-sm font-black uppercase tracking-wide text-black">
-            Zahlung kommt bald
+            Preis folgt nach Alpha
           </div>
         </div>
       </div>
