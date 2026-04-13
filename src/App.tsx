@@ -88,7 +88,7 @@ const Hero: React.FC = () => {
         <p className="text-base md:text-xl text-black/60 font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
           coreV ist die moderne All-in-One App für österreichische Vereine —
           von der Mitgliederverwaltung bis zum integrierten Kassasystem.
-          Einfach, schnell, mobil.
+          Modular aufgebaut, mobil nutzbar und bereit für Wachstum.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center px-4">
           <button
@@ -111,11 +111,11 @@ const Hero: React.FC = () => {
           </div>
           <div className="text-center">
             <div className="text-2xl sm:text-3xl font-black">1 App</div>
-            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Alles drin</div>
+            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Standardmodule</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl sm:text-3xl font-black">ab €9,90</div>
-            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Basic pro Monat</div>
+            <div className="text-2xl sm:text-3xl font-black">Gratis</div>
+            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Basic Einstieg</div>
           </div>
         </div>
       </div>
@@ -246,11 +246,10 @@ const Features: React.FC = () => (
 )
 
 const modules = [
-  { name: 'coreV', desc: 'Vereinsmanagement & POS', status: 'Verfügbar', color: 'bg-green-100 text-green-700' },
-  { name: 'coreE', desc: 'Eventmanagement', status: 'Bald', color: 'bg-amber-100 text-amber-700' },
-  { name: 'coreF', desc: 'Einnahmen-Ausgaben', status: 'Bald', color: 'bg-amber-100 text-amber-700' },
-  { name: 'coreG', desc: 'Gastro POS', status: 'Geplant', color: 'bg-slate-100 text-slate-500' },
-  { name: 'coreB', desc: 'Buchungssystem', status: 'Geplant', color: 'bg-slate-100 text-slate-500' },
+  { name: 'coreV', desc: 'Standardmodule für Vereinsmanagement, Kommunikation und POS.', status: 'Verfügbar', color: 'bg-green-100 text-green-700' },
+  { name: 'Fangstatistik', desc: 'Spezialmodul für Fischerei- und Angelvereine.', status: 'Separat', color: 'bg-[#F6F1E4] text-[#9A8A60]' },
+  { name: 'Business', desc: 'Spezialmodul für erweiterte geschäftliche Anforderungen.', status: 'Geplant', color: 'bg-slate-100 text-slate-500' },
+  { name: 'Revier', desc: 'Spezialmodul für Revier- und Gebietsverwaltung.', status: 'Geplant', color: 'bg-slate-100 text-slate-500' },
 ]
 
 const Module: React.FC = () => (
@@ -260,14 +259,14 @@ const Module: React.FC = () => (
         <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Das Ökosystem</div>
         <h2 className="text-3xl md:text-5xl font-black tracking-tighter">core4X Module.</h2>
         <p className="mt-4 text-black/50 font-medium max-w-xl mx-auto text-sm md:text-base">
-          coreV ist erst der Anfang. Das core4X Ökosystem wächst — wähle nur die Module die du brauchst.
+          coreV deckt die Standardmodule ab. Spezialmodule wie Fangstatistik, Business oder Revier werden separat angeboten.
         </p>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {modules.map((m, i) => (
           <div key={i} className="rounded-2xl border border-black/10 p-5 flex items-start gap-4">
             <div className="w-12 h-12 rounded-xl bg-[#F6F1E4] flex items-center justify-center flex-shrink-0">
-              <span className="text-xs font-black text-[#B5A47A]">{m.name}</span>
+              <span className="text-[10px] font-black text-[#B5A47A] text-center leading-tight">{m.name}</span>
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-1 gap-2">
@@ -286,6 +285,7 @@ const Module: React.FC = () => (
 )
 
 const basicFeatures = [
+  'Kostenloser Einstieg',
   'Kalender mit vollem Standardzugriff',
   'Rechnungen immer verfügbar',
   'Boniersystem mit max. 6 Artikeln',
@@ -297,12 +297,12 @@ const basicFeatures = [
 ]
 
 const premiumFeatures = [
-  'Alles aus Basic',
-  'Keine Basic-Limits bei Artikeln und Umsatz',
-  'Keine Basic-Limits bei Aufgaben, Einkauf und Umfragen',
-  'Mehrere Projektchat-Gruppen pro Projekt',
-  'Alle Module freischaltbar',
-  'Ideal für größere Vereine und Veranstaltungsbetrieb',
+  'Alle Standardmodule enthalten',
+  'Keine Limits bei Artikeln und Umsatz',
+  'Keine Limits bei Aufgaben, Einkauf und Umfragen',
+  'Keine Limits bei Projektchat-Gruppen',
+  'Ideal für wachsende Communities und Veranstaltungsbetrieb',
+  'Spezialmodule werden bei Bedarf separat ergänzt',
 ]
 
 const Preise: React.FC = () => (
@@ -312,7 +312,7 @@ const Preise: React.FC = () => (
         <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Transparent & fair</div>
         <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Klare Pakete statt Chaos.</h2>
         <p className="mt-4 text-black/50 font-medium text-sm md:text-base max-w-2xl mx-auto">
-          Die Landingpage ist jetzt auf das aktuelle Lizenzmodell ausgerichtet. Zahlung und Checkout werden nach der Alpha-Phase freigeschaltet.
+          Basic ist kostenlos. Premium enthält alle Standardmodule ohne Limits. Spezialmodule wie Fangstatistik, Business oder Revier werden separat angeboten.
         </p>
       </div>
 
@@ -320,10 +320,10 @@ const Preise: React.FC = () => (
         <div className="bg-white rounded-2xl border border-black/10 p-6 md:p-8">
           <div className="flex items-center justify-between gap-3 mb-2">
             <div className="text-xs font-black uppercase tracking-widest text-black/40">Basic</div>
-            <span className="text-[10px] font-black uppercase tracking-wide px-2 py-1 rounded-full bg-[#F6F1E4] text-[#9A8A60]">Einstieg</span>
+            <span className="text-[10px] font-black uppercase tracking-wide px-2 py-1 rounded-full bg-[#F6F1E4] text-[#9A8A60]">Kostenlos</span>
           </div>
-          <div className="text-4xl font-black mb-1">ab €9,90</div>
-          <div className="text-sm text-black/40 mb-6">pro Monat</div>
+          <div className="text-4xl font-black mb-1">Gratis</div>
+          <div className="text-sm text-black/40 mb-6">für den einfachen Einstieg</div>
           <ul className="space-y-3 mb-8">
             {basicFeatures.map((feature, i) => (
               <li key={i} className="flex items-start gap-2 text-sm font-medium">
@@ -336,17 +336,17 @@ const Preise: React.FC = () => (
             Basic ist bewusst begrenzt. Das Paket soll klein starten, aber produktiv nutzbar bleiben.
           </div>
           <div className="w-full py-3 rounded-xl bg-[#1A1A1A] text-center text-sm font-black uppercase tracking-wide text-white">
-            Zahlung kommt bald
+            Kostenlos starten
           </div>
         </div>
 
         <div className="bg-[#1A1A1A] rounded-2xl border border-white/5 p-6 md:p-8 text-white">
           <div className="flex items-center justify-between gap-3 mb-2">
             <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A]">Premium</div>
-            <span className="text-[10px] font-black uppercase tracking-wide px-2 py-1 rounded-full bg-[#B5A47A] text-black">Volles Paket</span>
+            <span className="text-[10px] font-black uppercase tracking-wide px-2 py-1 rounded-full bg-[#B5A47A] text-black">Ohne Limits</span>
           </div>
-          <div className="text-4xl font-black mb-1">Individuell</div>
-          <div className="text-sm text-white/40 mb-6">für wachsende Communities</div>
+          <div className="text-4xl font-black mb-1">Preis folgt</div>
+          <div className="text-sm text-white/40 mb-6">für Vereine mit mehr Umfang</div>
           <ul className="space-y-3 mb-8">
             {premiumFeatures.map((feature, i) => (
               <li key={i} className="flex items-start gap-2 text-sm font-medium">
@@ -356,7 +356,7 @@ const Preise: React.FC = () => (
             ))}
           </ul>
           <div className="rounded-xl bg-white/5 px-4 py-3 text-xs text-white/70 font-semibold leading-relaxed mb-4">
-            Premium wird als Ausbaupaket positioniert. Zusätzliche Integrationen und Erweiterungen können später modular ergänzt werden.
+            Premium enthält alle Standardmodule ohne Limits. Spezialmodule wie Fangstatistik sind nicht enthalten und werden separat angeboten.
           </div>
           <div className="w-full py-3 rounded-xl bg-[#B5A47A] text-center text-sm font-black uppercase tracking-wide text-black">
             Preis folgt nach Alpha
