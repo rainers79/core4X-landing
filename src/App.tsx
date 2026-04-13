@@ -1,6 +1,16 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 const API_BASE = 'https://schmidt-kottingbrunn.at/api/wp-json/core4x/v1'
+
+const BASIC_DOWNLOAD_URL = '#vormerken'
+const PREMIUM_CHECKOUT_URL = '#vormerken'
+const SPECIALMODULE_CHECKOUT_URL = '#vormerken'
+
+const PREMIUM_MONTHLY_PRICE = 10.99
+const PREMIUM_YEARLY_MONTHLY_PRICE = 9.99
+const SPECIAL_MODULE_MONTHLY_PRICE = 5.99
+const SPECIAL_MODULE_YEARLY_MONTHLY_PRICE = 4.99
+const PREMIUM_SPECIAL_YEARLY_DISCOUNT = 0.15
 
 interface PreregisterForm {
   first_name: string
@@ -8,6 +18,54 @@ interface PreregisterForm {
   email: string
   phone: string
   company: string
+}
+
+type BillingCycle = 'monthly' | 'yearly'
+type PackageType = 'basic' | 'premium'
+
+type SpecialModuleOption = {
+  id: string
+  name: string
+  description: string
+}
+
+const specialModuleOptions: SpecialModuleOption[] = [
+  {
+    id: 'fishing',
+    name: 'Fangstatistik',
+    description: 'Spezialmodul für Fischerei- und Angelvereine.',
+  },
+  {
+    id: 'business',
+    name: 'Business-Modul',
+    description: 'Spezialmodul für erweiterte geschäftliche Anforderungen.',
+  },
+  {
+    id: 'territory',
+    name: 'Reviermodul',
+    description: 'Spezialmodul für Revier- und Gebietsverwaltung.',
+  },
+]
+
+const formatPrice = (value: number): string =>
+  new Intl.NumberFormat('de-AT', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value)
+
+const scrollToSection = (id: string) => {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+}
+
+const runAction = (url: string) => {
+  if (url.startsWith('#')) {
+    scrollToSection(url.replace('#', ''))
+    return
+  }
+
+  window.location.href = url
 }
 
 const Modal: React.FC<{ title: string; onClose: () => void; children: React.ReactNode }> = ({ title, onClose, children }) => (
@@ -29,7 +87,7 @@ const Nav: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false)
 
   const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+    scrollToSection(id)
     setMenuOpen(false)
   }
 
@@ -46,10 +104,10 @@ const Nav: React.FC = () => {
           <button onClick={() => scrollTo('preise')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Preise</button>
         </div>
         <button
-          onClick={() => scrollTo('vormerken')}
+          onClick={() => scrollTo('preise')}
           className="hidden md:block px-4 py-2 rounded-xl bg-[#B5A47A] text-black text-sm font-black uppercase tracking-wide"
         >
-          Jetzt vormerken
+          Paket wählen
         </button>
         <button className="md:hidden p-2" onClick={() => setMenuOpen(!menuOpen)}>
           <div className="w-5 h-0.5 bg-black mb-1" />
@@ -70,10 +128,6 @@ const Nav: React.FC = () => {
 }
 
 const Hero: React.FC = () => {
-  const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-  }
-
   return (
     <section className="min-h-screen flex items-center justify-center px-5 pt-16 overflow-hidden">
       <div className="max-w-4xl mx-auto text-center w-full">
@@ -92,16 +146,16 @@ const Hero: React.FC = () => {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center px-4">
           <button
-            onClick={() => scrollTo('vormerken')}
+            onClick={() => scrollToSection('preise')}
             className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#1A1A1A] text-white text-sm font-black uppercase tracking-wide"
           >
-            Alpha vormerken
+            Paket wählen
           </button>
           <button
-            onClick={() => scrollTo('preise')}
+            onClick={() => scrollToSection('vormerken')}
             className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#B5A47A]/20 text-black text-sm font-black uppercase tracking-wide"
           >
-            Pakete ansehen
+            Alpha vormerken
           </button>
         </div>
         <div className="mt-16 grid grid-cols-3 gap-4 max-w-lg mx-auto px-4">
@@ -110,12 +164,12 @@ const Hero: React.FC = () => {
             <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Vereine in AT</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl sm:text-3xl font-black">1 App</div>
-            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Standardmodule</div>
-          </div>
-          <div className="text-center">
             <div className="text-2xl sm:text-3xl font-black">Gratis</div>
             <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Basic Einstieg</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl sm:text-3xl font-black">ab 10,99 €</div>
+            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Premium monatlich</div>
           </div>
         </div>
       </div>
@@ -247,9 +301,9 @@ const Features: React.FC = () => (
 
 const modules = [
   { name: 'coreV', desc: 'Standardmodule für Vereinsmanagement, Kommunikation und POS.', status: 'Verfügbar', color: 'bg-green-100 text-green-700' },
-  { name: 'Fangstatistik', desc: 'Spezialmodul für Fischerei- und Angelvereine.', status: 'Separat', color: 'bg-[#F6F1E4] text-[#9A8A60]' },
-  { name: 'Business', desc: 'Spezialmodul für erweiterte geschäftliche Anforderungen.', status: 'Geplant', color: 'bg-slate-100 text-slate-500' },
-  { name: 'Revier', desc: 'Spezialmodul für Revier- und Gebietsverwaltung.', status: 'Geplant', color: 'bg-slate-100 text-slate-500' },
+  { name: 'Fangstatistik', desc: 'Spezialmodul für Fischerei- und Angelvereine.', status: '5,99 € / 4,99 €', color: 'bg-[#F6F1E4] text-[#9A8A60]' },
+  { name: 'Business', desc: 'Spezialmodul für erweiterte geschäftliche Anforderungen.', status: '5,99 € / 4,99 €', color: 'bg-[#F6F1E4] text-[#9A8A60]' },
+  { name: 'Revier', desc: 'Spezialmodul für Revier- und Gebietsverwaltung.', status: '5,99 € / 4,99 €', color: 'bg-[#F6F1E4] text-[#9A8A60]' },
 ]
 
 const Module: React.FC = () => (
@@ -259,7 +313,7 @@ const Module: React.FC = () => (
         <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Das Ökosystem</div>
         <h2 className="text-3xl md:text-5xl font-black tracking-tighter">core4X Module.</h2>
         <p className="mt-4 text-black/50 font-medium max-w-xl mx-auto text-sm md:text-base">
-          coreV deckt die Standardmodule ab. Spezialmodule wie Fangstatistik, Business oder Revier werden separat angeboten.
+          coreV deckt die Standardmodule ab. Spezialmodule wie Fangstatistik, Business oder Revier können separat ergänzt werden.
         </p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -305,67 +359,325 @@ const premiumFeatures = [
   'Spezialmodule werden bei Bedarf separat ergänzt',
 ]
 
-const Preise: React.FC = () => (
-  <section id="preise" className="py-24 px-5">
-    <div className="max-w-5xl mx-auto">
-      <div className="text-center mb-16">
-        <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Transparent & fair</div>
-        <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Klare Pakete statt Chaos.</h2>
-        <p className="mt-4 text-black/50 font-medium text-sm md:text-base max-w-2xl mx-auto">
-          Basic ist kostenlos. Premium enthält alle Standardmodule ohne Limits. Spezialmodule wie Fangstatistik, Business oder Revier werden separat angeboten.
-        </p>
-      </div>
+const Preise: React.FC = () => {
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly')
+  const [selectedPackage, setSelectedPackage] = useState<PackageType>('basic')
+  const [selectedSpecialModules, setSelectedSpecialModules] = useState<string[]>([])
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-2xl border border-black/10 p-6 md:p-8">
-          <div className="flex items-center justify-between gap-3 mb-2">
-            <div className="text-xs font-black uppercase tracking-widest text-black/40">Basic</div>
-            <span className="text-[10px] font-black uppercase tracking-wide px-2 py-1 rounded-full bg-[#F6F1E4] text-[#9A8A60]">Kostenlos</span>
+  const toggleSpecialModule = (moduleId: string) => {
+    setSelectedSpecialModules((current) =>
+      current.includes(moduleId)
+        ? current.filter((entry) => entry !== moduleId)
+        : [...current, moduleId]
+    )
+  }
+
+  const calculation = useMemo(() => {
+    const premiumBase =
+      selectedPackage === 'premium'
+        ? billingCycle === 'monthly'
+          ? PREMIUM_MONTHLY_PRICE
+          : PREMIUM_YEARLY_MONTHLY_PRICE
+        : 0
+
+    const specialModuleUnitPrice =
+      billingCycle === 'monthly'
+        ? SPECIAL_MODULE_MONTHLY_PRICE
+        : SPECIAL_MODULE_YEARLY_MONTHLY_PRICE
+
+    const specialModulesSubtotal = selectedSpecialModules.length * specialModuleUnitPrice
+
+    const discount =
+      billingCycle === 'yearly' &&
+      selectedPackage === 'premium' &&
+      selectedSpecialModules.length > 0
+        ? (premiumBase + specialModulesSubtotal) * PREMIUM_SPECIAL_YEARLY_DISCOUNT
+        : 0
+
+    const total = premiumBase + specialModulesSubtotal - discount
+
+    return {
+      premiumBase,
+      specialModuleUnitPrice,
+      specialModulesSubtotal,
+      discount,
+      total,
+    }
+  }, [billingCycle, selectedPackage, selectedSpecialModules])
+
+  const primaryActionLabel =
+    selectedPackage === 'basic' && selectedSpecialModules.length === 0
+      ? 'Basic kostenlos wählen'
+      : selectedPackage === 'premium'
+        ? 'Premium kaufen'
+        : 'Spezialmodule anfragen'
+
+  const primaryActionUrl =
+    selectedPackage === 'basic' && selectedSpecialModules.length === 0
+      ? BASIC_DOWNLOAD_URL
+      : selectedPackage === 'premium'
+        ? PREMIUM_CHECKOUT_URL
+        : SPECIALMODULE_CHECKOUT_URL
+
+  return (
+    <section id="preise" className="py-24 px-5">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-16">
+          <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Transparent & fair</div>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Klare Pakete statt Chaos.</h2>
+          <p className="mt-4 text-black/50 font-medium text-sm md:text-base max-w-2xl mx-auto">
+            Basic ist kostenlos. Premium enthält alle Standardmodule ohne Limits. Spezialmodule wie Fangstatistik, Business oder Revier werden separat angeboten.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white rounded-2xl border border-black/10 p-6 md:p-8">
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <div className="text-xs font-black uppercase tracking-widest text-black/40">Basic</div>
+              <span className="text-[10px] font-black uppercase tracking-wide px-2 py-1 rounded-full bg-[#F6F1E4] text-[#9A8A60]">Kostenlos</span>
+            </div>
+            <div className="text-4xl font-black mb-1">Gratis</div>
+            <div className="text-sm text-black/40 mb-6">für den einfachen Einstieg</div>
+            <ul className="space-y-3 mb-8">
+              {basicFeatures.map((feature, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm font-medium">
+                  <span className="text-green-500 mt-0.5">✓</span>
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="rounded-xl bg-slate-100 px-4 py-3 text-xs text-slate-600 font-semibold leading-relaxed mb-4">
+              Basic ist bewusst begrenzt. Das Paket soll klein starten, aber produktiv nutzbar bleiben.
+            </div>
+            <div className="w-full py-3 rounded-xl bg-[#1A1A1A] text-center text-sm font-black uppercase tracking-wide text-white">
+              Kostenlos starten
+            </div>
           </div>
-          <div className="text-4xl font-black mb-1">Gratis</div>
-          <div className="text-sm text-black/40 mb-6">für den einfachen Einstieg</div>
-          <ul className="space-y-3 mb-8">
-            {basicFeatures.map((feature, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm font-medium">
-                <span className="text-green-500 mt-0.5">✓</span>
-                <span>{feature}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="rounded-xl bg-slate-100 px-4 py-3 text-xs text-slate-600 font-semibold leading-relaxed mb-4">
-            Basic ist bewusst begrenzt. Das Paket soll klein starten, aber produktiv nutzbar bleiben.
-          </div>
-          <div className="w-full py-3 rounded-xl bg-[#1A1A1A] text-center text-sm font-black uppercase tracking-wide text-white">
-            Kostenlos starten
+
+          <div className="bg-[#1A1A1A] rounded-2xl border border-white/5 p-6 md:p-8 text-white">
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A]">Premium</div>
+              <span className="text-[10px] font-black uppercase tracking-wide px-2 py-1 rounded-full bg-[#B5A47A] text-black">Ohne Limits</span>
+            </div>
+            <div className="text-4xl font-black mb-1">{formatPrice(PREMIUM_MONTHLY_PRICE)}</div>
+            <div className="text-sm text-white/40 mb-6">
+              monatlich · {formatPrice(PREMIUM_YEARLY_MONTHLY_PRICE)} im Jahresabo
+            </div>
+            <ul className="space-y-3 mb-8">
+              {premiumFeatures.map((feature, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm font-medium">
+                  <span className="text-[#B5A47A] mt-0.5">✓</span>
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="rounded-xl bg-white/5 px-4 py-3 text-xs text-white/70 font-semibold leading-relaxed mb-4">
+              Premium enthält alle Standardmodule ohne Limits. Spezialmodule wie Fangstatistik sind nicht enthalten und werden separat angeboten.
+            </div>
+            <div className="w-full py-3 rounded-xl bg-[#B5A47A] text-center text-sm font-black uppercase tracking-wide text-black">
+              Premium konfigurieren
+            </div>
           </div>
         </div>
 
-        <div className="bg-[#1A1A1A] rounded-2xl border border-white/5 p-6 md:p-8 text-white">
-          <div className="flex items-center justify-between gap-3 mb-2">
-            <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A]">Premium</div>
-            <span className="text-[10px] font-black uppercase tracking-wide px-2 py-1 rounded-full bg-[#B5A47A] text-black">Ohne Limits</span>
+        <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
+          <div className="bg-white rounded-2xl border border-black/10 p-6 md:p-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+              <div>
+                <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-2">Paket-Konfigurator</div>
+                <h3 className="text-2xl md:text-3xl font-black tracking-tight">Paket auswählen und kombinieren</h3>
+              </div>
+              <div className="inline-flex bg-[#F6F1E4] rounded-2xl p-1">
+                <button
+                  onClick={() => setBillingCycle('monthly')}
+                  className={`px-4 py-2 rounded-xl text-sm font-black uppercase tracking-wide transition-colors ${
+                    billingCycle === 'monthly' ? 'bg-[#1A1A1A] text-white' : 'text-black/60'
+                  }`}
+                >
+                  Monatlich
+                </button>
+                <button
+                  onClick={() => setBillingCycle('yearly')}
+                  className={`px-4 py-2 rounded-xl text-sm font-black uppercase tracking-wide transition-colors ${
+                    billingCycle === 'yearly' ? 'bg-[#1A1A1A] text-white' : 'text-black/60'
+                  }`}
+                >
+                  Jährlich
+                </button>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4 mb-8">
+              <button
+                onClick={() => setSelectedPackage('basic')}
+                className={`text-left rounded-2xl border p-5 transition-all ${
+                  selectedPackage === 'basic'
+                    ? 'border-[#B5A47A] bg-[#F6F1E4]'
+                    : 'border-black/10 bg-white'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <span className="text-lg font-black">Basic</span>
+                  <span className="text-xs font-black uppercase tracking-wide px-2 py-1 rounded-full bg-white text-black/60">
+                    Kostenlos
+                  </span>
+                </div>
+                <div className="text-3xl font-black mb-2">Gratis</div>
+                <p className="text-sm text-black/60">
+                  Kostenloser Einstieg mit begrenzten Standardfunktionen.
+                </p>
+              </button>
+
+              <button
+                onClick={() => setSelectedPackage('premium')}
+                className={`text-left rounded-2xl border p-5 transition-all ${
+                  selectedPackage === 'premium'
+                    ? 'border-[#B5A47A] bg-[#1A1A1A] text-white'
+                    : 'border-black/10 bg-white'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <span className="text-lg font-black">Premium</span>
+                  <span className={`text-xs font-black uppercase tracking-wide px-2 py-1 rounded-full ${
+                    selectedPackage === 'premium' ? 'bg-[#B5A47A] text-black' : 'bg-[#F6F1E4] text-[#9A8A60]'
+                  }`}>
+                    Ohne Limits
+                  </span>
+                </div>
+                <div className="text-3xl font-black mb-2">
+                  {billingCycle === 'monthly'
+                    ? formatPrice(PREMIUM_MONTHLY_PRICE)
+                    : formatPrice(PREMIUM_YEARLY_MONTHLY_PRICE)}
+                </div>
+                <p className={`text-sm ${selectedPackage === 'premium' ? 'text-white/70' : 'text-black/60'}`}>
+                  Alle Standardmodule ohne Limits. Spezialmodule separat zubuchbar.
+                </p>
+              </button>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <div>
+                  <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-1">Spezialmodule</div>
+                  <h4 className="text-xl font-black">Optional ergänzen</h4>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-black">
+                    {billingCycle === 'monthly'
+                      ? `${formatPrice(SPECIAL_MODULE_MONTHLY_PRICE)} / Modul`
+                      : `${formatPrice(SPECIAL_MODULE_YEARLY_MONTHLY_PRICE)} / Modul`}
+                  </div>
+                  <div className="text-xs text-black/40">
+                    {billingCycle === 'yearly' ? 'im Jahresabo' : 'monatlich'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {specialModuleOptions.map((module) => {
+                  const isSelected = selectedSpecialModules.includes(module.id)
+
+                  return (
+                    <button
+                      key={module.id}
+                      onClick={() => toggleSpecialModule(module.id)}
+                      className={`w-full text-left rounded-2xl border p-4 transition-all ${
+                        isSelected ? 'border-[#B5A47A] bg-[#F6F1E4]' : 'border-black/10 bg-white'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <div className="font-black text-sm mb-1">{module.name}</div>
+                          <div className="text-xs text-black/50">{module.description}</div>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <span className="text-xs font-black text-black/60">
+                            {billingCycle === 'monthly'
+                              ? formatPrice(SPECIAL_MODULE_MONTHLY_PRICE)
+                              : formatPrice(SPECIAL_MODULE_YEARLY_MONTHLY_PRICE)}
+                          </span>
+                          <span className={`text-[10px] font-black uppercase tracking-wide px-2 py-1 rounded-full ${
+                            isSelected ? 'bg-[#B5A47A] text-black' : 'bg-slate-100 text-slate-500'
+                          }`}>
+                            {isSelected ? 'Aktiv' : 'Hinzufügen'}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
           </div>
-          <div className="text-4xl font-black mb-1">Preis folgt</div>
-          <div className="text-sm text-white/40 mb-6">für Vereine mit mehr Umfang</div>
-          <ul className="space-y-3 mb-8">
-            {premiumFeatures.map((feature, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm font-medium">
-                <span className="text-[#B5A47A] mt-0.5">✓</span>
-                <span>{feature}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="rounded-xl bg-white/5 px-4 py-3 text-xs text-white/70 font-semibold leading-relaxed mb-4">
-            Premium enthält alle Standardmodule ohne Limits. Spezialmodule wie Fangstatistik sind nicht enthalten und werden separat angeboten.
-          </div>
-          <div className="w-full py-3 rounded-xl bg-[#B5A47A] text-center text-sm font-black uppercase tracking-wide text-black">
-            Preis folgt nach Alpha
+
+          <div className="bg-[#1A1A1A] rounded-2xl border border-white/5 p-6 md:p-8 text-white h-fit">
+            <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-2">Zusammenfassung</div>
+            <h3 className="text-2xl font-black tracking-tight mb-6">Deine Auswahl</h3>
+
+            <div className="space-y-4 mb-6">
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <span className="text-white/60">Paket</span>
+                <span className="font-black">{selectedPackage === 'basic' ? 'Basic' : 'Premium'}</span>
+              </div>
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <span className="text-white/60">Abrechnung</span>
+                <span className="font-black">{billingCycle === 'monthly' ? 'Monatlich' : 'Jährlich'}</span>
+              </div>
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <span className="text-white/60">Premium</span>
+                <span className="font-black">
+                  {selectedPackage === 'premium' ? formatPrice(calculation.premiumBase) : formatPrice(0)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <span className="text-white/60">Spezialmodule ({selectedSpecialModules.length})</span>
+                <span className="font-black">{formatPrice(calculation.specialModulesSubtotal)}</span>
+              </div>
+
+              {calculation.discount > 0 && (
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <span className="text-[#B5A47A]">15 % Kombi-Rabatt</span>
+                  <span className="font-black text-[#B5A47A]">- {formatPrice(calculation.discount)}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="border-t border-white/10 pt-5 mb-6">
+              <div className="flex items-end justify-between gap-3">
+                <div>
+                  <div className="text-xs font-black uppercase tracking-widest text-white/40 mb-2">Gesamt</div>
+                  <div className="text-4xl font-black">{formatPrice(calculation.total)}</div>
+                </div>
+                <div className="text-right text-xs text-white/50 font-semibold">
+                  {billingCycle === 'yearly' ? 'pro Monat im Jahresabo' : 'pro Monat'}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => runAction(primaryActionUrl)}
+                className="w-full py-4 rounded-xl bg-[#B5A47A] text-black text-sm font-black uppercase tracking-wide"
+              >
+                {primaryActionLabel}
+              </button>
+              <button
+                onClick={() => runAction('#vormerken')}
+                className="w-full py-4 rounded-xl bg-white/5 text-white text-sm font-black uppercase tracking-wide"
+              >
+                Zur Alpha-Vormerkung
+              </button>
+            </div>
+
+            <div className="mt-6 rounded-xl bg-white/5 px-4 py-3 text-xs text-white/70 font-semibold leading-relaxed">
+              Download- und Checkout-Ziele sind aktuell vorbereitet. Die Buttons können später direkt auf echte Download- oder Zahlungslinks gelegt werden.
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
-)
+    </section>
+  )
+}
 
 const App: React.FC = () => {
   const [showImpressum, setShowImpressum] = useState(false)
