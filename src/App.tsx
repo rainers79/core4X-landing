@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
-const API_BASE = 'https://api.schmidt-kottingbrunn.at/wp-json/core4x/v1'
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'https://api.schmidt-kottingbrunn.at/wp-json/core4x/v1').replace(/\/$/, '')
 
 const BASIC_DOWNLOAD_URL = '#vormerken'
 const PREMIUM_CHECKOUT_URL = '#vormerken'
