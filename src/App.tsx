@@ -55,7 +55,6 @@ const Nav: React.FC = () => {
         <div className="hidden md:flex items-center gap-8">
           <button onClick={() => scrollTo('vormerken')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Alpha</button>
           <button onClick={() => scrollTo('features')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Funktionen</button>
-          <button onClick={() => scrollTo('module')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Module</button>
           <button onClick={() => scrollTo('zukunft')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Zukunft</button>
           <button onClick={() => scrollTo('preise')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Preise</button>
         </div>
@@ -75,7 +74,6 @@ const Nav: React.FC = () => {
         <div className="md:hidden bg-[#F6F1E4] border-t border-black/5 px-5 py-4 space-y-3">
           <button onClick={() => scrollTo('vormerken')} className="block text-sm font-semibold">Alpha vormerken</button>
           <button onClick={() => scrollTo('features')} className="block text-sm font-semibold">Funktionen</button>
-          <button onClick={() => scrollTo('module')} className="block text-sm font-semibold">Module</button>
           <button onClick={() => scrollTo('zukunft')} className="block text-sm font-semibold">Zukunft</button>
           <button onClick={() => scrollTo('preise')} className="block text-sm font-semibold">Preise</button>
         </div>
@@ -261,45 +259,6 @@ const Features: React.FC = () => (
   </section>
 )
 
-const modules = [
-  { name: 'Grundsystem', desc: 'Projekte, Kalender, Aufgaben, Umfragen, Mitgliederverwaltung, Kernteam und Projektchat.', status: 'Geplant' },
-  { name: 'Organisation', desc: 'Einkaufslisten, Rechnungen, Rollen, Einladungen und Vereinsabläufe an einem Ort.', status: 'Geplant' },
-  { name: 'Boniersystem / POS', desc: 'Artikelverwaltung, Bestellungen, Tagesauswertung, Projektzuordnung und Verkaufsübersicht.', status: 'In Arbeit' },
-  { name: 'Benachrichtigungen', desc: 'Push-Benachrichtigungen für wichtige Vereinsaktivitäten und interne Abstimmung.', status: 'Geplant' },
-]
-
-const Module: React.FC = () => (
-  <section id="module" className="py-24 px-5 bg-white">
-    <div className="max-w-6xl mx-auto">
-      <div className="text-center mb-16">
-        <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Module</div>
-        <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Core4X für den Vereinsalltag.</h2>
-        <p className="mt-4 text-black/50 font-medium max-w-2xl mx-auto text-sm md:text-base">
-          Core4X konzentriert sich zuerst auf den Grundumfang für Vereine und ein praxistaugliches Boniersystem für Veranstaltungen.
-        </p>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {modules.map((m, i) => (
-          <div key={i} className="rounded-2xl border border-black/10 p-5 flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-[#F6F1E4] flex items-center justify-center flex-shrink-0">
-              <span className="text-[10px] font-black text-[#B5A47A] text-center leading-tight">Core4X</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-1 gap-2">
-                <h3 className="font-black text-sm">{m.name}</h3>
-                <span className="text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full flex-shrink-0 bg-[#F6F1E4] text-[#9A8A60]">
-                  {m.status}
-                </span>
-              </div>
-              <p className="text-xs text-black/50">{m.desc}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-)
-
 
 const Zukunft: React.FC = () => (
   <section id="zukunft" className="py-24 px-5 bg-[#111318] text-white overflow-hidden">
@@ -370,9 +329,6 @@ const Preise: React.FC = () => (
         <div className="bg-white rounded-2xl border border-black/5 p-6 md:p-8 shadow-sm">
           <div className="text-xs font-black uppercase tracking-widest text-black/40 mb-2">Geplanter Grundumfang</div>
           <h3 className="text-2xl font-black tracking-tight mb-4">Ein starkes Basissystem für Vereine.</h3>
-          <p className="text-sm text-black/60 leading-relaxed mb-6">
-            Der Fokus liegt auf einer klaren, leistbaren Vereins-App. Vereine sollen einfach starten können und nur einen Funktionsumfang erhalten, der in der Praxis wirklich gebraucht wird.
-          </p>
           <div className="mb-5 rounded-2xl border border-[#B5A47A]/35 bg-[#F6F1E4] px-5 py-5">
             <div className="flex items-start gap-4">
               <div className="mt-1 h-10 w-10 rounded-xl bg-[#B5A47A] text-black flex items-center justify-center text-xs font-black uppercase tracking-wide flex-shrink-0">
@@ -401,9 +357,6 @@ const Preise: React.FC = () => (
           <div>
             <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-2">Noch keine Fixpreise</div>
             <h3 className="text-2xl font-black tracking-tight mb-4">Fair, modular und praxisnah.</h3>
-            <p className="text-sm text-white/65 leading-relaxed mb-6">
-              Die Preislogik wird aktuell bewusst noch nicht final veröffentlicht. Erst die Alpha zeigt, welche Grenzen, Pakete und Erweiterungen für Vereine wirklich sinnvoll sind.
-            </p>
             <div className="space-y-4">
               <div className="rounded-xl bg-white/5 px-4 py-4">
                 <div className="text-sm font-black mb-1">Basic-Einstieg wird geprüft</div>
@@ -447,7 +400,6 @@ const App: React.FC = () => {
       <Hero />
       <Vormerken />
       <Features />
-      <Module />
       <Zukunft />
       <Preise />
 
