@@ -322,9 +322,6 @@ const Zukunft: React.FC = () => (
               </div>
             ))}
           </div>
-          <p className="mt-6 text-xs text-white/40 leading-relaxed">
-            Der Fokus bleibt klar: zuerst ein stabiles Grundsystem, danach gezielte Erweiterungen, wenn sie im echten Vereinsalltag messbaren Nutzen bringen.
-          </p>
         </div>
 
         <div className="relative">
