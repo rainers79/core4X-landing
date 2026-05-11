@@ -40,13 +40,23 @@ const Nav: React.FC = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#F6F1E4]/90 backdrop-blur-sm border-b border-black/5">
       <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
-        <span className="text-xl font-black tracking-tight">
-          Core<span className="text-[#B5A47A]">4X</span>
-        </span>
+        <div className="flex items-center gap-3">
+          <img
+            src="/core4x-icon-512.png"
+            alt="Core4X Icon"
+            className="h-9 w-9 rounded-xl object-cover shadow-sm"
+            width={36}
+            height={36}
+          />
+          <span className="text-xl font-black tracking-tight">
+            Core<span className="text-[#B5A47A]">4X</span>
+          </span>
+        </div>
         <div className="hidden md:flex items-center gap-8">
           <button onClick={() => scrollTo('vormerken')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Alpha</button>
           <button onClick={() => scrollTo('features')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Funktionen</button>
           <button onClick={() => scrollTo('module')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Module</button>
+          <button onClick={() => scrollTo('zukunft')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Zukunft</button>
           <button onClick={() => scrollTo('preise')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Preise</button>
         </div>
         <button
@@ -66,6 +76,7 @@ const Nav: React.FC = () => {
           <button onClick={() => scrollTo('vormerken')} className="block text-sm font-semibold">Alpha vormerken</button>
           <button onClick={() => scrollTo('features')} className="block text-sm font-semibold">Funktionen</button>
           <button onClick={() => scrollTo('module')} className="block text-sm font-semibold">Module</button>
+          <button onClick={() => scrollTo('zukunft')} className="block text-sm font-semibold">Zukunft</button>
           <button onClick={() => scrollTo('preise')} className="block text-sm font-semibold">Preise</button>
         </div>
       )}
@@ -289,6 +300,50 @@ const Module: React.FC = () => (
   </section>
 )
 
+
+const Zukunft: React.FC = () => (
+  <section id="zukunft" className="py-24 px-5 bg-[#111318] text-white overflow-hidden">
+    <div className="max-w-6xl mx-auto">
+      <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-10 lg:gap-14 items-center">
+        <div>
+          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-[#B5A47A]/15 border border-[#B5A47A]/25 text-[#D8C37E] text-xs font-black uppercase tracking-widest mb-6">
+            Zukunftsplan
+          </div>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter leading-tight mb-5">
+            Eine Plattform für viele Vereinswelten.
+          </h2>
+          <p className="text-sm md:text-base text-white/65 font-medium leading-relaxed mb-6">
+            Core4X soll langfristig nicht nur einzelne Abläufe abbilden, sondern verschiedene Vereinsarten sauber unterstützen: vom Sportverein über Feuerwehr und Fischerverein bis zur klassischen Vereinsorganisation.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {['Sport & Teams', 'Veranstaltungen', 'Aufgaben & Projekte', 'Kommunikation', 'Mitglieder & Rollen', 'Vereinsabläufe'].map((item) => (
+              <div key={item} className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm font-bold text-white/80">
+                {item}
+              </div>
+            ))}
+          </div>
+          <p className="mt-6 text-xs text-white/40 leading-relaxed">
+            Der Fokus bleibt klar: zuerst ein stabiles Grundsystem, danach gezielte Erweiterungen, wenn sie im echten Vereinsalltag messbaren Nutzen bringen.
+          </p>
+        </div>
+
+        <div className="relative">
+          <div className="absolute -inset-6 bg-[#B5A47A]/15 blur-3xl rounded-full" />
+          <div className="relative rounded-[2rem] overflow-hidden border border-white/10 bg-black shadow-2xl">
+            <img
+              src="/core4x-future-plan.png"
+              alt="Core4X Zukunftsplan für verschiedene Vereinsarten"
+              className="w-full h-auto object-cover"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+)
+
 const includedModules = [
   'Projekte',
   'Kalender',
@@ -396,6 +451,7 @@ const App: React.FC = () => {
       <Vormerken />
       <Features />
       <Module />
+      <Zukunft />
       <Preise />
 
       <footer className="py-12 px-5 border-t border-black/5">
