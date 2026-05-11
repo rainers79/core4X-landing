@@ -1,10 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useState } from 'react'
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'https://api.schmidt-kottingbrunn.at/wp-json/core4x/v1').replace(/\/$/, '')
-
-const BASIC_DOWNLOAD_URL = '#vormerken'
-const PREMIUM_CHECKOUT_URL = '#vormerken'
-const SPECIALMODULE_CHECKOUT_URL = '#vormerken'
 
 interface PreregisterForm {
   first_name: string
@@ -14,86 +10,8 @@ interface PreregisterForm {
   company: string
 }
 
-type BillingCycle = 'monthly' | 'yearly'
-type PackageType = 'basic' | 'premium'
-
-interface BillingCatalogProduct {
-  product_key: string
-  product_type: 'base' | 'addon'
-  name: string
-  description: string
-  is_special: boolean
-  prices: {
-    monthly_cents: number
-    yearly_monthly_cents: number
-  }
-}
-
-interface BillingCatalogResponse {
-  success: boolean
-  currency: string
-  discounts: {
-    premium_special_yearly_percent: number
-  }
-  packages: BillingCatalogProduct[]
-  special_modules: BillingCatalogProduct[]
-}
-
-interface BillingQuoteLineItem {
-  product_key: string
-  name: string
-  product_type: 'base' | 'addon'
-  billing_cycle: BillingCycle
-  unit_amount_cents: number
-  quantity: number
-  line_total_cents: number
-}
-
-interface BillingQuoteResponse {
-  success: boolean
-  package_key: PackageType
-  billing_cycle: BillingCycle
-  currency: string
-  selected_special_modules: string[]
-  discount_percent: number
-  line_items: BillingQuoteLineItem[]
-  pricing: {
-    base_monthly_cents: number
-    special_modules_monthly_cents: number
-    subtotal_monthly_cents: number
-    discount_monthly_cents: number
-    total_monthly_cents: number
-    billed_total_cents: number
-    monthly_display_cents: number
-  }
-  entitlements: {
-    plan: string
-    standard_module_keys: string[]
-    special_module_keys: string[]
-  }
-}
-
-const formatPrice = (value: number): string =>
-  new Intl.NumberFormat('de-AT', {
-    style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value)
-
-const formatPriceFromCents = (valueCents: number): string => formatPrice((valueCents || 0) / 100)
-
 const scrollToSection = (id: string) => {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-}
-
-const runAction = (url: string) => {
-  if (url.startsWith('#')) {
-    scrollToSection(url.replace('#', ''))
-    return
-  }
-
-  window.location.href = url
 }
 
 const Modal: React.FC<{ title: string; onClose: () => void; children: React.ReactNode }> = ({ title, onClose, children }) => (
@@ -123,19 +41,19 @@ const Nav: React.FC = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#F6F1E4]/90 backdrop-blur-sm border-b border-black/5">
       <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
         <span className="text-xl font-black tracking-tight">
-          core<span className="text-[#B5A47A]">V</span>
+          Core<span className="text-[#B5A47A]">4X</span>
         </span>
         <div className="hidden md:flex items-center gap-8">
           <button onClick={() => scrollTo('vormerken')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Alpha</button>
-          <button onClick={() => scrollTo('features')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Features</button>
+          <button onClick={() => scrollTo('features')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Funktionen</button>
           <button onClick={() => scrollTo('module')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Module</button>
           <button onClick={() => scrollTo('preise')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Preise</button>
         </div>
         <button
-          onClick={() => scrollTo('preise')}
+          onClick={() => scrollTo('vormerken')}
           className="hidden md:block px-4 py-2 rounded-xl bg-[#B5A47A] text-black text-sm font-black uppercase tracking-wide"
         >
-          Paket wählen
+          Alpha vormerken
         </button>
         <button className="md:hidden p-2" onClick={() => setMenuOpen(!menuOpen)}>
           <div className="w-5 h-0.5 bg-black mb-1" />
@@ -146,7 +64,7 @@ const Nav: React.FC = () => {
       {menuOpen && (
         <div className="md:hidden bg-[#F6F1E4] border-t border-black/5 px-5 py-4 space-y-3">
           <button onClick={() => scrollTo('vormerken')} className="block text-sm font-semibold">Alpha vormerken</button>
-          <button onClick={() => scrollTo('features')} className="block text-sm font-semibold">Features</button>
+          <button onClick={() => scrollTo('features')} className="block text-sm font-semibold">Funktionen</button>
           <button onClick={() => scrollTo('module')} className="block text-sm font-semibold">Module</button>
           <button onClick={() => scrollTo('preise')} className="block text-sm font-semibold">Preise</button>
         </div>
@@ -160,24 +78,23 @@ const Hero: React.FC = () => {
     <section className="min-h-screen flex items-center justify-center px-5 pt-16 overflow-hidden">
       <div className="max-w-4xl mx-auto text-center w-full">
         <div className="inline-block px-4 py-1.5 rounded-full bg-[#B5A47A]/20 text-[#9A8A60] text-xs font-black uppercase tracking-widest mb-6">
-          Alpha coming soon
+          Alpha in Vorbereitung
         </div>
         <h1 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter leading-tight mb-6">
-          Vereins-management
+          Vereinsmanagement
           <br />
           <span className="text-[#B5A47A]">neu gedacht.</span>
         </h1>
         <p className="text-base md:text-xl text-black/60 font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
-          coreV ist die moderne All-in-One App für österreichische Vereine —
-          von der Mitgliederverwaltung bis zum integrierten Kassasystem.
-          Modular aufgebaut, mobil nutzbar und bereit für Wachstum.
+          Core4X ist eine moderne Vereins-App für Organisation, Kommunikation und Veranstaltungen —
+          mit Projekten, Kalender, Aufgaben, Umfragen, Mitgliederverwaltung und integriertem Boniersystem.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center px-4">
           <button
-            onClick={() => scrollToSection('preise')}
+            onClick={() => scrollToSection('module')}
             className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#1A1A1A] text-white text-sm font-black uppercase tracking-wide"
           >
-            Paket wählen
+            Funktionen ansehen
           </button>
           <button
             onClick={() => scrollToSection('vormerken')}
@@ -188,16 +105,16 @@ const Hero: React.FC = () => {
         </div>
         <div className="mt-16 grid grid-cols-3 gap-4 max-w-lg mx-auto px-4">
           <div className="text-center">
-            <div className="text-2xl sm:text-3xl font-black">125k+</div>
-            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Vereine in AT</div>
+            <div className="text-2xl sm:text-3xl font-black">Mobil</div>
+            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black/40 mt-1">für den Vereinsalltag</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl sm:text-3xl font-black">Gratis</div>
-            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Basic Einstieg</div>
+            <div className="text-2xl sm:text-3xl font-black">Modular</div>
+            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black/40 mt-1">klar erweiterbar</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl sm:text-3xl font-black">ab 10,99 €</div>
-            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black/40 mt-1">Premium monatlich</div>
+            <div className="text-2xl sm:text-3xl font-black">Praxisnah</div>
+            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black/40 mt-1">für echte Abläufe</div>
           </div>
         </div>
       </div>
@@ -226,8 +143,10 @@ const Vormerken: React.FC = () => {
       setError('Vorname und E-Mail sind erforderlich.')
       return
     }
+
     setLoading(true)
     setError(null)
+
     try {
       const res = await fetch(`${API_BASE}/preregister`, {
         method: 'POST',
@@ -255,14 +174,14 @@ const Vormerken: React.FC = () => {
           <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Alpha-Phase</div>
           <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Jetzt vormerken.</h2>
           <p className="mt-4 text-black/50 font-medium text-sm md:text-base">
-            Sei dabei wenn coreV startet. Alpha-Tester bekommen exklusiven Früh-Zugang und helfen das Produkt zu formen.
+            Core4X wird praxisnah weiterentwickelt. Interessierte Vereine können sich für die Alpha vormerken lassen.
           </p>
         </div>
         {success ? (
           <div className="text-center py-12">
             <div className="text-5xl mb-4">🎉</div>
             <h3 className="text-2xl font-black mb-2">Du bist dabei!</h3>
-            <p className="text-black/50">Wir melden uns sobald die Alpha startet.</p>
+            <p className="text-black/50">Wir melden uns, sobald der nächste Testschritt startet.</p>
           </div>
         ) : (
           <div className="bg-[#F6F1E4] rounded-2xl p-6 md:p-8 space-y-4">
@@ -285,7 +204,7 @@ const Vormerken: React.FC = () => {
               <input name="phone" value={form.phone} onChange={handleChange} placeholder="+43 123 456 789" className="w-full px-4 py-3 rounded-xl border-2 border-transparent bg-white font-medium focus:border-[#B5A47A] outline-none" />
             </div>
             <div>
-              <label className="text-xs font-black uppercase tracking-wider text-black/40 mb-1 block">Verein / Firma</label>
+              <label className="text-xs font-black uppercase tracking-wider text-black/40 mb-1 block">Verein / Organisation</label>
               <input name="company" value={form.company} onChange={handleChange} placeholder="Mein Verein" className="w-full px-4 py-3 rounded-xl border-2 border-transparent bg-white font-medium focus:border-[#B5A47A] outline-none" />
             </div>
             {error && (
@@ -294,7 +213,7 @@ const Vormerken: React.FC = () => {
             <button onClick={handleSubmit} disabled={loading} className="w-full py-4 rounded-xl bg-[#1A1A1A] text-white text-sm font-black uppercase tracking-wide disabled:opacity-50">
               {loading ? 'Wird gesendet...' : 'Für Alpha vormerken'}
             </button>
-            <p className="text-xs text-black/30 text-center">Keine Zahlung erforderlich. Nur eine Vorankündigung.</p>
+            <p className="text-xs text-black/30 text-center">Keine Zahlung erforderlich. Nur eine Vormerkung.</p>
           </div>
         )}
       </div>
@@ -303,20 +222,20 @@ const Vormerken: React.FC = () => {
 }
 
 const features = [
-  { icon: '👥', title: 'Mitgliederverwaltung', description: 'Alle Mitglieder zentral verwalten. Profile, Rollen, Kontaktdaten — alles an einem Ort.' },
-  { icon: '🧾', title: 'Kassasystem (POS)', description: 'Integriertes Boniersystem für Veranstaltungen. Schnell, mobil, übersichtlich.' },
-  { icon: '📅', title: 'Kalender & Events', description: 'Veranstaltungen planen, Termine koordinieren und das Team auf dem Laufenden halten.' },
-  { icon: '✅', title: 'Aufgaben & Teams', description: 'Aufgaben zuweisen, Fortschritt verfolgen und Kernteams für Projekte zusammenstellen.' },
-  { icon: '💬', title: 'Chat & Kommunikation', description: 'Interner Chat für das Team — direkt in der App, kein externes Tool nötig.' },
-  { icon: '📊', title: 'Umfragen & Abstimmungen', description: 'Schnell Meinungen einholen und Entscheidungen demokratisch treffen.' },
+  { icon: '📁', title: 'Projekte', description: 'Veranstaltungen und Vorhaben zentral planen, strukturieren und mit den passenden Bereichen verknüpfen.' },
+  { icon: '📅', title: 'Kalender', description: 'Termine planen, sichtbar machen und den Verein auf dem aktuellen Stand halten.' },
+  { icon: '✅', title: 'Aufgaben', description: 'Aufgaben zuweisen, Verantwortlichkeiten klären und Fortschritte im Blick behalten.' },
+  { icon: '📊', title: 'Umfragen', description: 'Meinungen einholen, Entscheidungen vorbereiten und Abstimmungen direkt im Verein organisieren.' },
+  { icon: '👥', title: 'Mitgliederverwaltung', description: 'Mitglieder, Rollen und Kontaktdaten zentral verwalten.' },
+  { icon: '💬', title: 'Projektchat', description: 'Kommunikation dort führen, wo die Arbeit passiert: direkt im passenden Projekt.' },
 ]
 
 const Features: React.FC = () => (
   <section id="features" className="py-24 px-5">
     <div className="max-w-6xl mx-auto">
       <div className="text-center mb-16">
-        <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Was coreV kann</div>
-        <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Alles was dein Verein braucht.</h2>
+        <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Was Core4X kann</div>
+        <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Alles, was der Vereinsalltag braucht.</h2>
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {features.map((f, i) => (
@@ -332,32 +251,32 @@ const Features: React.FC = () => (
 )
 
 const modules = [
-  { name: 'coreV', desc: 'Standardmodule für Vereinsmanagement, Kommunikation und POS.', status: 'Verfügbar', color: 'bg-green-100 text-green-700' },
-  { name: 'Fangstatistik', desc: 'Spezialmodul für Fischerei- und Angelvereine.', status: 'Separat', color: 'bg-[#F6F1E4] text-[#9A8A60]' },
-  { name: 'Business', desc: 'Spezialmodul für erweiterte geschäftliche Anforderungen.', status: 'Separat', color: 'bg-[#F6F1E4] text-[#9A8A60]' },
-  { name: 'Revier', desc: 'Spezialmodul für Revier- und Gebietsverwaltung.', status: 'Separat', color: 'bg-[#F6F1E4] text-[#9A8A60]' },
+  { name: 'Grundsystem', desc: 'Projekte, Kalender, Aufgaben, Umfragen, Mitgliederverwaltung, Kernteam und Projektchat.', status: 'Geplant' },
+  { name: 'Organisation', desc: 'Einkaufslisten, Rechnungen, Rollen, Einladungen und Vereinsabläufe an einem Ort.', status: 'Geplant' },
+  { name: 'Boniersystem / POS', desc: 'Artikelverwaltung, Bestellungen, Tagesauswertung, Projektzuordnung und Verkaufsübersicht.', status: 'In Arbeit' },
+  { name: 'Branding & Benachrichtigungen', desc: 'Eigenes Erscheinungsbild und Push-Benachrichtigungen für wichtige Vereinsaktivitäten.', status: 'Geplant' },
 ]
 
 const Module: React.FC = () => (
   <section id="module" className="py-24 px-5 bg-white">
     <div className="max-w-6xl mx-auto">
       <div className="text-center mb-16">
-        <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Das Ökosystem</div>
-        <h2 className="text-3xl md:text-5xl font-black tracking-tighter">core4X Module.</h2>
-        <p className="mt-4 text-black/50 font-medium max-w-xl mx-auto text-sm md:text-base">
-          coreV deckt die Standardmodule ab. Spezialmodule wie Fangstatistik, Business oder Revier können separat ergänzt werden.
+        <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Module</div>
+        <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Core4X für den Vereinsalltag.</h2>
+        <p className="mt-4 text-black/50 font-medium max-w-2xl mx-auto text-sm md:text-base">
+          Core4X konzentriert sich zuerst auf den Grundumfang für Vereine und ein praxistaugliches Boniersystem für Veranstaltungen.
         </p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {modules.map((m, i) => (
           <div key={i} className="rounded-2xl border border-black/10 p-5 flex items-start gap-4">
             <div className="w-12 h-12 rounded-xl bg-[#F6F1E4] flex items-center justify-center flex-shrink-0">
-              <span className="text-[10px] font-black text-[#B5A47A] text-center leading-tight">{m.name}</span>
+              <span className="text-[10px] font-black text-[#B5A47A] text-center leading-tight">Core4X</span>
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-1 gap-2">
                 <h3 className="font-black text-sm">{m.name}</h3>
-                <span className={`text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full flex-shrink-0 ${m.color}`}>
+                <span className="text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full flex-shrink-0 bg-[#F6F1E4] text-[#9A8A60]">
                   {m.status}
                 </span>
               </div>
@@ -370,481 +289,88 @@ const Module: React.FC = () => (
   </section>
 )
 
-const basicFeatures = [
-  'Kostenloser Einstieg',
-  'Kalender mit vollem Standardzugriff',
-  'Rechnungen immer verfügbar',
-  'Boniersystem mit max. 6 Artikeln',
-  'Boniersystem bis max. €1.500 Umsatz',
-  'Max. 2 Aufgaben pro Projekt',
-  'Max. 2 Einkaufseinträge pro Projekt',
-  'Max. 5 Umfragen pro Projekt',
-  'Max. 1 Projektchat-Gruppe pro Projekt',
+const includedModules = [
+  'Projekte',
+  'Kalender',
+  'Aufgaben',
+  'Umfragen',
+  'Mitgliederverwaltung',
+  'Kernteam',
+  'Einkaufsliste',
+  'Rechnungen',
+  'Projektchat',
+  'Push-Benachrichtigungen',
+  'Eigenes Erscheinungsbild',
+  'Boniersystem / POS',
 ]
 
-const premiumFeatures = [
-  'Alle Standardmodule enthalten',
-  'Keine Limits bei Artikeln und Umsatz',
-  'Keine Limits bei Aufgaben, Einkauf und Umfragen',
-  'Keine Limits bei Projektchat-Gruppen',
-  'Ideal für wachsende Communities und Veranstaltungsbetrieb',
-  'Spezialmodule werden bei Bedarf separat ergänzt',
-]
+const Preise: React.FC = () => (
+  <section id="preise" className="py-24 px-5 bg-[#F6F1E4]">
+    <div className="max-w-6xl mx-auto">
+      <div className="text-center mb-14">
+        <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Pakete & Preise</div>
+        <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Preisstruktur in Ausarbeitung.</h2>
+        <p className="mt-4 text-black/55 font-medium max-w-2xl mx-auto text-sm md:text-base">
+          Core4X befindet sich aktuell in der Alpha-/Beta-Vorbereitung. Die endgültigen Pakete und Preise werden nach den ersten Praxistests festgelegt.
+        </p>
+      </div>
 
-const Preise: React.FC = () => {
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly')
-  const [selectedPackage, setSelectedPackage] = useState<PackageType>('basic')
-  const [selectedSpecialModules, setSelectedSpecialModules] = useState<string[]>([])
-  const [catalog, setCatalog] = useState<BillingCatalogResponse | null>(null)
-  const [catalogLoading, setCatalogLoading] = useState(true)
-  const [catalogError, setCatalogError] = useState<string | null>(null)
-  const [quote, setQuote] = useState<BillingQuoteResponse | null>(null)
-  const [quoteLoading, setQuoteLoading] = useState(false)
-  const [quoteError, setQuoteError] = useState<string | null>(null)
-
-  useEffect(() => {
-    let active = true
-
-    const loadCatalog = async () => {
-      setCatalogLoading(true)
-      setCatalogError(null)
-
-      try {
-        const res = await fetch(`${API_BASE}/billing/catalog`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-
-        const data = await res.json()
-
-        if (!res.ok) {
-          throw new Error(data?.message || 'Billing-Katalog konnte nicht geladen werden.')
-        }
-
-        if (!active) return
-
-        setCatalog(data)
-      } catch (err: any) {
-        if (!active) return
-        if (err instanceof TypeError) {
-          setCatalogError('Netzwerk- oder CORS-Fehler. Bitte API-URL und CORS prüfen.')
-        } else {
-          setCatalogError(err?.message || 'Billing-Katalog konnte nicht geladen werden.')
-        }
-      } finally {
-        if (active) {
-          setCatalogLoading(false)
-        }
-      }
-    }
-
-    loadCatalog()
-
-    return () => {
-      active = false
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!catalog) return
-
-    let active = true
-
-    const loadQuote = async () => {
-      setQuoteLoading(true)
-      setQuoteError(null)
-
-      try {
-        const res = await fetch(`${API_BASE}/billing/quote`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            package_key: selectedPackage,
-            billing_cycle: billingCycle,
-            special_module_keys: selectedSpecialModules,
-          }),
-        })
-
-        const data = await res.json()
-
-        if (!res.ok) {
-          throw new Error(data?.message || 'Preisberechnung konnte nicht geladen werden.')
-        }
-
-        if (!active) return
-
-        setQuote(data)
-      } catch (err: any) {
-        if (!active) return
-        if (err instanceof TypeError) {
-          setQuoteError('Netzwerk- oder CORS-Fehler. Bitte API-URL und CORS prüfen.')
-        } else {
-          setQuoteError(err?.message || 'Preisberechnung konnte nicht geladen werden.')
-        }
-      } finally {
-        if (active) {
-          setQuoteLoading(false)
-        }
-      }
-    }
-
-    loadQuote()
-
-    return () => {
-      active = false
-    }
-  }, [catalog, selectedPackage, billingCycle, selectedSpecialModules])
-
-  const basicPackage = useMemo(
-    () => catalog?.packages.find((item) => item.product_key === 'basic') || null,
-    [catalog]
-  )
-
-  const premiumPackage = useMemo(
-    () => catalog?.packages.find((item) => item.product_key === 'premium') || null,
-    [catalog]
-  )
-
-  const specialModules = useMemo(
-    () => catalog?.special_modules || [],
-    [catalog]
-  )
-
-  const discountPercent = catalog?.discounts?.premium_special_yearly_percent || 15
-
-  const toggleSpecialModule = (moduleId: string) => {
-    setSelectedSpecialModules((current) =>
-      current.includes(moduleId)
-        ? current.filter((entry) => entry !== moduleId)
-        : [...current, moduleId]
-    )
-  }
-
-  const primaryActionLabel =
-    selectedPackage === 'basic' && selectedSpecialModules.length === 0
-      ? 'Basic kostenlos wählen'
-      : selectedPackage === 'premium'
-        ? 'Premium kaufen'
-        : 'Spezialmodule anfragen'
-
-  const primaryActionUrl =
-    selectedPackage === 'basic' && selectedSpecialModules.length === 0
-      ? BASIC_DOWNLOAD_URL
-      : selectedPackage === 'premium'
-        ? PREMIUM_CHECKOUT_URL
-        : SPECIALMODULE_CHECKOUT_URL
-
-  const summaryMonthlyCents = quote?.pricing?.monthly_display_cents ?? 0
-  const summaryBilledTotalCents = quote?.pricing?.billed_total_cents ?? 0
-
-  return (
-    <section id="preise" className="py-24 px-5">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-16">
-          <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Transparent & fair</div>
-          <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Klare Pakete statt Chaos.</h2>
-          <p className="mt-4 text-black/50 font-medium text-sm md:text-base max-w-2xl mx-auto">
-            Basic ist kostenlos. Premium enthält alle Standardmodule ohne Limits. Spezialmodule wie Fangstatistik, Business oder Revier werden separat angeboten.
+      <div className="grid lg:grid-cols-2 gap-6 items-stretch">
+        <div className="bg-white rounded-2xl border border-black/5 p-6 md:p-8 shadow-sm">
+          <div className="text-xs font-black uppercase tracking-widest text-black/40 mb-2">Geplanter Grundumfang</div>
+          <h3 className="text-2xl font-black tracking-tight mb-4">Ein starkes Basissystem für Vereine.</h3>
+          <p className="text-sm text-black/60 leading-relaxed mb-6">
+            Der Fokus liegt auf einer klaren, leistbaren Vereins-App. Vereine sollen einfach starten können und nur einen Funktionsumfang erhalten, der in der Praxis wirklich gebraucht wird.
           </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-2xl border border-black/10 p-6 md:p-8">
-            <div className="flex items-center justify-between gap-3 mb-2">
-              <div className="text-xs font-black uppercase tracking-widest text-black/40">Basic</div>
-              <span className="text-[10px] font-black uppercase tracking-wide px-2 py-1 rounded-full bg-[#F6F1E4] text-[#9A8A60]">Kostenlos</span>
-            </div>
-            <div className="text-4xl font-black mb-1">
-              {basicPackage ? formatPriceFromCents(basicPackage.prices.monthly_cents) : 'Gratis'}
-            </div>
-            <div className="text-sm text-black/40 mb-6">für den einfachen Einstieg</div>
-            <ul className="space-y-3 mb-8">
-              {basicFeatures.map((feature, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm font-medium">
-                  <span className="text-green-500 mt-0.5">✓</span>
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="rounded-xl bg-slate-100 px-4 py-3 text-xs text-slate-600 font-semibold leading-relaxed mb-4">
-              Basic ist bewusst begrenzt. Das Paket soll klein starten, aber produktiv nutzbar bleiben.
-            </div>
-            <div className="w-full py-3 rounded-xl bg-[#1A1A1A] text-center text-sm font-black uppercase tracking-wide text-white">
-              Kostenlos starten
-            </div>
-          </div>
-
-          <div className="bg-[#1A1A1A] rounded-2xl border border-white/5 p-6 md:p-8 text-white">
-            <div className="flex items-center justify-between gap-3 mb-2">
-              <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A]">Premium</div>
-              <span className="text-[10px] font-black uppercase tracking-wide px-2 py-1 rounded-full bg-[#B5A47A] text-black">Ohne Limits</span>
-            </div>
-            <div className="text-4xl font-black mb-1">
-              {premiumPackage ? formatPriceFromCents(premiumPackage.prices.monthly_cents) : '—'}
-            </div>
-            <div className="text-sm text-white/40 mb-6">
-              monatlich · {premiumPackage ? formatPriceFromCents(premiumPackage.prices.yearly_monthly_cents) : '—'} im Jahresabo
-            </div>
-            <ul className="space-y-3 mb-8">
-              {premiumFeatures.map((feature, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm font-medium">
-                  <span className="text-[#B5A47A] mt-0.5">✓</span>
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="rounded-xl bg-white/5 px-4 py-3 text-xs text-white/70 font-semibold leading-relaxed mb-4">
-              Premium enthält alle Standardmodule ohne Limits. Spezialmodule wie Fangstatistik sind nicht enthalten und werden separat angeboten.
-            </div>
-            <div className="w-full py-3 rounded-xl bg-[#B5A47A] text-center text-sm font-black uppercase tracking-wide text-black">
-              Premium konfigurieren
-            </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {includedModules.map((feature) => (
+              <div key={feature} className="flex items-center gap-3 rounded-xl bg-[#F6F1E4] px-4 py-3">
+                <span className="w-2 h-2 rounded-full bg-[#B5A47A] flex-shrink-0" />
+                <span className="text-sm font-bold text-black/70">{feature}</span>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
-          <div className="bg-white rounded-2xl border border-black/10 p-6 md:p-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-              <div>
-                <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-2">Paket-Konfigurator</div>
-                <h3 className="text-2xl md:text-3xl font-black tracking-tight">Paket auswählen und kombinieren</h3>
+        <div className="bg-[#1A1A1A] rounded-2xl border border-white/5 p-6 md:p-8 text-white h-full flex flex-col justify-between">
+          <div>
+            <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-2">Noch keine Fixpreise</div>
+            <h3 className="text-2xl font-black tracking-tight mb-4">Fair, modular und praxisnah.</h3>
+            <p className="text-sm text-white/65 leading-relaxed mb-6">
+              Die Preislogik wird aktuell bewusst noch nicht final veröffentlicht. Erst die Alpha zeigt, welche Grenzen, Pakete und Erweiterungen für Vereine wirklich sinnvoll sind.
+            </p>
+            <div className="space-y-4">
+              <div className="rounded-xl bg-white/5 px-4 py-4">
+                <div className="text-sm font-black mb-1">Basic-Einstieg wird geprüft</div>
+                <div className="text-xs text-white/55 leading-relaxed">Kleine Vereine sollen ohne unnötige Hürden starten können.</div>
               </div>
-              <div className="inline-flex bg-[#F6F1E4] rounded-2xl p-1">
-                <button
-                  onClick={() => setBillingCycle('monthly')}
-                  className={`px-4 py-2 rounded-xl text-sm font-black uppercase tracking-wide transition-colors ${
-                    billingCycle === 'monthly' ? 'bg-[#1A1A1A] text-white' : 'text-black/60'
-                  }`}
-                >
-                  Monatlich
-                </button>
-                <button
-                  onClick={() => setBillingCycle('yearly')}
-                  className={`px-4 py-2 rounded-xl text-sm font-black uppercase tracking-wide transition-colors ${
-                    billingCycle === 'yearly' ? 'bg-[#1A1A1A] text-white' : 'text-black/60'
-                  }`}
-                >
-                  Jährlich
-                </button>
+              <div className="rounded-xl bg-white/5 px-4 py-4">
+                <div className="text-sm font-black mb-1">Premium-Modell wird ausgearbeitet</div>
+                <div className="text-xs text-white/55 leading-relaxed">Erweiterte Nutzung, weniger Limits und stärkere Veranstaltungsfunktionen werden nach den Praxistests bewertet.</div>
               </div>
-            </div>
-
-            {catalogLoading && (
-              <div className="mb-6 rounded-xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-600">
-                Billing-Katalog wird geladen…
-              </div>
-            )}
-
-            {catalogError && (
-              <div className="mb-6 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm font-semibold text-red-700">
-                {catalogError}
-              </div>
-            )}
-
-            <div className="grid md:grid-cols-2 gap-4 mb-8">
-              <button
-                onClick={() => setSelectedPackage('basic')}
-                className={`text-left rounded-2xl border p-5 transition-all ${
-                  selectedPackage === 'basic'
-                    ? 'border-[#B5A47A] bg-[#F6F1E4]'
-                    : 'border-black/10 bg-white'
-                }`}
-              >
-                <div className="flex items-center justify-between gap-3 mb-3">
-                  <span className="text-lg font-black">Basic</span>
-                  <span className="text-xs font-black uppercase tracking-wide px-2 py-1 rounded-full bg-white text-black/60">
-                    Kostenlos
-                  </span>
-                </div>
-                <div className="text-3xl font-black mb-2">
-                  {basicPackage ? formatPriceFromCents(basicPackage.prices.monthly_cents) : 'Gratis'}
-                </div>
-                <p className="text-sm text-black/60">
-                  Kostenloser Einstieg mit begrenzten Standardfunktionen.
-                </p>
-              </button>
-
-              <button
-                onClick={() => setSelectedPackage('premium')}
-                className={`text-left rounded-2xl border p-5 transition-all ${
-                  selectedPackage === 'premium'
-                    ? 'border-[#B5A47A] bg-[#1A1A1A] text-white'
-                    : 'border-black/10 bg-white'
-                }`}
-              >
-                <div className="flex items-center justify-between gap-3 mb-3">
-                  <span className="text-lg font-black">Premium</span>
-                  <span className={`text-xs font-black uppercase tracking-wide px-2 py-1 rounded-full ${
-                    selectedPackage === 'premium' ? 'bg-[#B5A47A] text-black' : 'bg-[#F6F1E4] text-[#9A8A60]'
-                  }`}>
-                    Ohne Limits
-                  </span>
-                </div>
-                <div className="text-3xl font-black mb-2">
-                  {premiumPackage
-                    ? formatPriceFromCents(
-                        billingCycle === 'monthly'
-                          ? premiumPackage.prices.monthly_cents
-                          : premiumPackage.prices.yearly_monthly_cents
-                      )
-                    : '—'}
-                </div>
-                <p className={`text-sm ${selectedPackage === 'premium' ? 'text-white/70' : 'text-black/60'}`}>
-                  Alle Standardmodule ohne Limits. Spezialmodule separat zubuchbar.
-                </p>
-              </button>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between gap-3 mb-4">
-                <div>
-                  <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-1">Spezialmodule</div>
-                  <h4 className="text-xl font-black">Optional ergänzen</h4>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-black">
-                    {specialModules.length > 0
-                      ? `${formatPriceFromCents(
-                          billingCycle === 'monthly'
-                            ? specialModules[0].prices.monthly_cents
-                            : specialModules[0].prices.yearly_monthly_cents
-                        )} / Modul`
-                      : '—'}
-                  </div>
-                  <div className="text-xs text-black/40">
-                    {billingCycle === 'yearly' ? 'im Jahresabo' : 'monatlich'}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {specialModules.map((module) => {
-                  const isSelected = selectedSpecialModules.includes(module.product_key)
-
-                  return (
-                    <button
-                      key={module.product_key}
-                      onClick={() => toggleSpecialModule(module.product_key)}
-                      className={`w-full text-left rounded-2xl border p-4 transition-all ${
-                        isSelected ? 'border-[#B5A47A] bg-[#F6F1E4]' : 'border-black/10 bg-white'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <div className="font-black text-sm mb-1">{module.name}</div>
-                          <div className="text-xs text-black/50">{module.description}</div>
-                        </div>
-                        <div className="flex flex-col items-end gap-2">
-                          <span className="text-xs font-black text-black/60">
-                            {formatPriceFromCents(
-                              billingCycle === 'monthly'
-                                ? module.prices.monthly_cents
-                                : module.prices.yearly_monthly_cents
-                            )}
-                          </span>
-                          <span className={`text-[10px] font-black uppercase tracking-wide px-2 py-1 rounded-full ${
-                            isSelected ? 'bg-[#B5A47A] text-black' : 'bg-slate-100 text-slate-500'
-                          }`}>
-                            {isSelected ? 'Aktiv' : 'Hinzufügen'}
-                          </span>
-                        </div>
-                      </div>
-                    </button>
-                  )
-                })}
+              <div className="rounded-xl bg-white/5 px-4 py-4">
+                <div className="text-sm font-black mb-1">Boniersystem bleibt ein Kernpunkt</div>
+                <div className="text-xs text-white/55 leading-relaxed">Das POS-Modul wird besonders auf Vereinsfeste, Verkaufssituationen und Tagesauswertungen ausgerichtet.</div>
               </div>
             </div>
           </div>
 
-          <div className="bg-[#1A1A1A] rounded-2xl border border-white/5 p-6 md:p-8 text-white h-fit">
-            <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-2">Zusammenfassung</div>
-            <h3 className="text-2xl font-black tracking-tight mb-6">Deine Auswahl</h3>
-
-            {quoteError && (
-              <div className="mb-4 rounded-xl bg-red-500/15 border border-red-500/20 px-4 py-3 text-sm font-semibold text-red-200">
-                {quoteError}
-              </div>
-            )}
-
-            <div className="space-y-4 mb-6">
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="text-white/60">Paket</span>
-                <span className="font-black">{selectedPackage === 'basic' ? 'Basic' : 'Premium'}</span>
-              </div>
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="text-white/60">Abrechnung</span>
-                <span className="font-black">{billingCycle === 'monthly' ? 'Monatlich' : 'Jährlich'}</span>
-              </div>
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="text-white/60">Premium</span>
-                <span className="font-black">
-                  {formatPriceFromCents(quote?.pricing?.base_monthly_cents ?? 0)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="text-white/60">Spezialmodule ({selectedSpecialModules.length})</span>
-                <span className="font-black">
-                  {formatPriceFromCents(quote?.pricing?.special_modules_monthly_cents ?? 0)}
-                </span>
-              </div>
-
-              {(quote?.pricing?.discount_monthly_cents ?? 0) > 0 && (
-                <div className="flex items-center justify-between gap-3 text-sm">
-                  <span className="text-[#B5A47A]">{discountPercent} % Kombi-Rabatt</span>
-                  <span className="font-black text-[#B5A47A]">
-                    - {formatPriceFromCents(quote?.pricing?.discount_monthly_cents ?? 0)}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <div className="border-t border-white/10 pt-5 mb-6">
-              <div className="flex items-end justify-between gap-3">
-                <div>
-                  <div className="text-xs font-black uppercase tracking-widest text-white/40 mb-2">Gesamt</div>
-                  <div className="text-4xl font-black">
-                    {quoteLoading ? '…' : formatPriceFromCents(summaryMonthlyCents)}
-                  </div>
-                </div>
-                <div className="text-right text-xs text-white/50 font-semibold">
-                  {billingCycle === 'yearly' ? 'pro Monat im Jahresabo' : 'pro Monat'}
-                </div>
-              </div>
-              {billingCycle === 'yearly' && (
-                <div className="mt-3 text-sm text-white/60">
-                  Verrechnet gesamt pro Jahr: <span className="font-black text-white">{formatPriceFromCents(summaryBilledTotalCents)}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-3">
-              <button
-                onClick={() => runAction(primaryActionUrl)}
-                className="w-full py-4 rounded-xl bg-[#B5A47A] text-black text-sm font-black uppercase tracking-wide"
-              >
-                {primaryActionLabel}
-              </button>
-              <button
-                onClick={() => runAction('#vormerken')}
-                className="w-full py-4 rounded-xl bg-white/5 text-white text-sm font-black uppercase tracking-wide"
-              >
-                Zur Alpha-Vormerkung
-              </button>
-            </div>
-
-            <div className="mt-6 rounded-xl bg-white/5 px-4 py-3 text-xs text-white/70 font-semibold leading-relaxed">
-              Der Konfigurator verwendet jetzt die Backend-Preislogik. Checkout-Ziele sind weiterhin vorbereitet und können im nächsten Schritt an echte Zahlungsanbieter angebunden werden.
-            </div>
+          <div className="mt-8 space-y-3">
+            <button
+              onClick={() => scrollToSection('vormerken')}
+              className="w-full py-4 rounded-xl bg-[#B5A47A] text-black text-sm font-black uppercase tracking-wide"
+            >
+              Alpha vormerken
+            </button>
+            <p className="text-xs text-white/40 text-center leading-relaxed">
+              Die finale Preisstruktur wird veröffentlicht, sobald die Testphase genug belastbare Rückmeldungen liefert.
+            </p>
           </div>
         </div>
       </div>
-    </section>
-  )
-}
+    </div>
+  </section>
+)
 
 const App: React.FC = () => {
   const [showImpressum, setShowImpressum] = useState(false)
@@ -862,11 +388,11 @@ const App: React.FC = () => {
       <footer className="py-12 px-5 border-t border-black/5">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
           <div className="text-xl font-black tracking-tight">
-            core<span className="text-[#B5A47A]">V</span>
-            <span className="text-xs font-bold text-black/30 ml-2 uppercase tracking-widest">by core4X</span>
+            Core<span className="text-[#B5A47A]">4X</span>
+            <span className="text-xs font-bold text-black/30 ml-2 uppercase tracking-widest">Vereins-App</span>
           </div>
           <div className="text-xs text-black/30 font-medium">
-            {new Date().getFullYear()} core4X. Alle Rechte vorbehalten.
+            {new Date().getFullYear()} Core4X. Alle Rechte vorbehalten.
           </div>
           <div className="flex gap-6">
             <button onClick={() => setShowImpressum(true)} className="text-xs font-semibold text-black/40 hover:text-black">Impressum</button>
@@ -880,7 +406,7 @@ const App: React.FC = () => {
           <p className="font-bold">Angaben gemäß § 5 ECG</p>
           <p>Schmidt Rainer<br />Friedrich Schmolka-Strasse 12<br />2542 Kottingbrunn<br />Österreich</p>
           <p>E-Mail: rainer@schmidt-kottingbrunn.at<br />Telefon: +43 676 4808464</p>
-          <p>Diese Website wird privat betrieben und dient der Vorstellung des Softwareprodukts coreV im Rahmen des core4X Projekts.</p>
+          <p>Diese Website wird privat betrieben und dient der Vorstellung des Softwareprodukts Core4X.</p>
         </Modal>
       )}
 
@@ -889,9 +415,9 @@ const App: React.FC = () => {
           <p className="font-bold">Verantwortlicher</p>
           <p>Schmidt Rainer<br />Friedrich Schmolka-Strasse 12<br />2542 Kottingbrunn<br />rainer@schmidt-kottingbrunn.at</p>
           <p className="font-bold">Welche Daten wir sammeln</p>
-          <p>Im Rahmen der Alpha-Voranmeldung erfassen wir folgende Daten: Vorname, Nachname, E-Mail-Adresse, Telefonnummer und Vereins- bzw. Firmenname. Die Angabe dieser Daten erfolgt freiwillig.</p>
+          <p>Im Rahmen der Alpha-Voranmeldung erfassen wir folgende Daten: Vorname, Nachname, E-Mail-Adresse, Telefonnummer und Vereins- bzw. Organisationsname. Die Angabe dieser Daten erfolgt freiwillig.</p>
           <p className="font-bold">Zweck der Verarbeitung</p>
-          <p>Die erhobenen Daten werden ausschließlich verwendet um Sie über den Start der Alpha-Phase und weitere Entwicklungen der core4X Produktfamilie zu informieren.</p>
+          <p>Die erhobenen Daten werden ausschließlich verwendet, um Sie über den Start der Alpha-Phase und weitere Entwicklungen von Core4X zu informieren.</p>
           <p className="font-bold">Speicherung</p>
           <p>Ihre Daten werden auf einem Server von World4You Internet Services GmbH in Österreich gespeichert.</p>
           <p className="font-bold">Ihre Rechte</p>
