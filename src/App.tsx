@@ -254,7 +254,7 @@ const modules = [
   { name: 'Grundsystem', desc: 'Projekte, Kalender, Aufgaben, Umfragen, Mitgliederverwaltung, Kernteam und Projektchat.', status: 'Geplant' },
   { name: 'Organisation', desc: 'Einkaufslisten, Rechnungen, Rollen, Einladungen und Vereinsabläufe an einem Ort.', status: 'Geplant' },
   { name: 'Boniersystem / POS', desc: 'Artikelverwaltung, Bestellungen, Tagesauswertung, Projektzuordnung und Verkaufsübersicht.', status: 'In Arbeit' },
-  { name: 'Branding & Benachrichtigungen', desc: 'Eigenes Erscheinungsbild und Push-Benachrichtigungen für wichtige Vereinsaktivitäten.', status: 'Geplant' },
+  { name: 'Benachrichtigungen', desc: 'Push-Benachrichtigungen für wichtige Vereinsaktivitäten und interne Abstimmung.', status: 'Geplant' },
 ]
 
 const Module: React.FC = () => (
@@ -300,7 +300,6 @@ const includedModules = [
   'Rechnungen',
   'Projektchat',
   'Push-Benachrichtigungen',
-  'Eigenes Erscheinungsbild',
   'Boniersystem / POS',
 ]
 
@@ -322,6 +321,20 @@ const Preise: React.FC = () => (
           <p className="text-sm text-black/60 leading-relaxed mb-6">
             Der Fokus liegt auf einer klaren, leistbaren Vereins-App. Vereine sollen einfach starten können und nur einen Funktionsumfang erhalten, der in der Praxis wirklich gebraucht wird.
           </p>
+          <div className="mb-5 rounded-2xl border border-[#B5A47A]/35 bg-[#F6F1E4] px-5 py-5">
+            <div className="flex items-start gap-4">
+              <div className="mt-1 h-10 w-10 rounded-xl bg-[#B5A47A] text-black flex items-center justify-center text-xs font-black uppercase tracking-wide flex-shrink-0">
+                CI
+              </div>
+              <div>
+                <div className="text-sm font-black text-black/80 mb-1">Eigenes Vereinsbranding ist vorgesehen</div>
+                <p className="text-xs text-black/55 leading-relaxed">
+                  Core4X soll nicht wie eine fremde Standard-App wirken. Logo, Farben und sichtbare Vereinsdarstellung können auf den jeweiligen Verein abgestimmt werden.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="grid sm:grid-cols-2 gap-3">
             {includedModules.map((feature) => (
               <div key={feature} className="flex items-center gap-3 rounded-xl bg-[#F6F1E4] px-4 py-3">
