@@ -100,7 +100,7 @@ const Hero: React.FC = () => {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center px-4">
           <button
-            onClick={() => scrollToSection('module')}
+            onClick={() => scrollToSection('features')}
             className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#1A1A1A] text-white text-sm font-black uppercase tracking-wide"
           >
             Funktionen ansehen
@@ -398,10 +398,10 @@ const App: React.FC = () => {
     <div className="min-h-screen overflow-x-hidden">
       <Nav />
       <Hero />
-      <Vormerken />
       <Features />
       <Zukunft />
       <Preise />
+      <Vormerken />
 
       <footer className="py-12 px-5 border-t border-black/5">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
