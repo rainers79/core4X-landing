@@ -319,32 +319,25 @@ const Preise: React.FC = () => (
     <div className="max-w-6xl mx-auto">
       <div className="text-center mb-14">
         <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Pakete & Preise</div>
-        <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Preisstruktur in Ausarbeitung.</h2>
+        <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Klare Pakete. Fairer Einstieg.</h2>
         <p className="mt-4 text-black/55 font-medium max-w-2xl mx-auto text-sm md:text-base">
-          Core4X befindet sich aktuell in der Alpha-/Beta-Vorbereitung. Die endgültigen Pakete und Preise werden nach den ersten Praxistests festgelegt.
+          Core4X startet mit einem kostenlosen Basic-Paket und einer Pro-Version für Vereine, die mehr Struktur, weniger Limits und ein starkes Boniersystem brauchen.
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6 items-stretch">
-        <div className="bg-white rounded-2xl border border-black/5 p-6 md:p-8 shadow-sm">
-          <div className="text-xs font-black uppercase tracking-widest text-black/40 mb-2">Geplanter Grundumfang</div>
-          <h3 className="text-2xl font-black tracking-tight mb-4">Ein starkes Basissystem für Vereine.</h3>
-          <div className="mb-5 rounded-2xl border border-[#B5A47A]/35 bg-[#F6F1E4] px-5 py-5">
-            <div className="flex items-start gap-4">
-              <div className="mt-1 h-10 w-10 rounded-xl bg-[#B5A47A] text-black flex items-center justify-center text-xs font-black uppercase tracking-wide flex-shrink-0">
-                CI
-              </div>
-              <div>
-                <div className="text-sm font-black text-black/80 mb-1">Eigenes Vereinsbranding ist vorgesehen</div>
-                <p className="text-xs text-black/55 leading-relaxed">
-                  Core4X soll nicht wie eine fremde Standard-App wirken. Logo, Farben und sichtbare Vereinsdarstellung können auf den jeweiligen Verein abgestimmt werden.
-                </p>
-              </div>
-            </div>
+      <div className="grid lg:grid-cols-3 gap-6 items-stretch">
+        <div className="bg-white rounded-2xl border border-black/5 p-6 md:p-8 shadow-sm flex flex-col">
+          <div className="text-xs font-black uppercase tracking-widest text-black/40 mb-2">Basic</div>
+          <h3 className="text-2xl font-black tracking-tight mb-3">Kostenlos starten.</h3>
+          <div className="mb-5">
+            <div className="text-4xl font-black tracking-tighter">0 €</div>
+            <div className="text-xs font-bold text-black/45 mt-1">für den Einstieg</div>
           </div>
-
-          <div className="grid sm:grid-cols-2 gap-3">
-            {includedModules.map((feature) => (
+          <p className="text-sm text-black/55 leading-relaxed mb-6">
+            Geeignet für kleine Vereine, erste Tests und einfache Organisationsabläufe ohne unnötige Einstiegshürde.
+          </p>
+          <div className="space-y-3 mt-auto">
+            {['Projekte und Aufgaben', 'Mitgliederverwaltung', 'Kalender und Umfragen', 'Basis-Kommunikation'].map((feature) => (
               <div key={feature} className="flex items-center gap-3 rounded-xl bg-[#F6F1E4] px-4 py-3">
                 <span className="w-2 h-2 rounded-full bg-[#B5A47A] flex-shrink-0" />
                 <span className="text-sm font-bold text-black/70">{feature}</span>
@@ -353,23 +346,30 @@ const Preise: React.FC = () => (
           </div>
         </div>
 
-        <div className="bg-[#1A1A1A] rounded-2xl border border-white/5 p-6 md:p-8 text-white h-full flex flex-col justify-between">
+        <div className="bg-[#1A1A1A] rounded-2xl border border-[#B5A47A]/50 p-6 md:p-8 text-white h-full flex flex-col justify-between shadow-xl relative overflow-hidden">
+          <div className="absolute right-5 top-5 rounded-full bg-[#B5A47A] px-3 py-1 text-[11px] font-black uppercase tracking-wide text-black">Einführungspreis</div>
           <div>
-            <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-2">Noch keine Fixpreise</div>
-            <h3 className="text-2xl font-black tracking-tight mb-4">Fair, modular und praxisnah.</h3>
-            <div className="space-y-4">
-              <div className="rounded-xl bg-white/5 px-4 py-4">
-                <div className="text-sm font-black mb-1">Basic-Einstieg wird geprüft</div>
-                <div className="text-xs text-white/55 leading-relaxed">Kleine Vereine sollen ohne unnötige Hürden starten können.</div>
+            <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-2">Pro</div>
+            <h3 className="text-2xl font-black tracking-tight mb-3 pr-28">Für aktive Vereine.</h3>
+            <div className="mb-5">
+              <div className="flex items-end gap-3">
+                <div className="text-5xl font-black tracking-tighter">130 €</div>
+                <div className="pb-2 text-sm font-bold text-white/45">/ Jahr</div>
               </div>
-              <div className="rounded-xl bg-white/5 px-4 py-4">
-                <div className="text-sm font-black mb-1">Premium-Modell wird ausgearbeitet</div>
-                <div className="text-xs text-white/55 leading-relaxed">Erweiterte Nutzung, weniger Limits und stärkere Veranstaltungsfunktionen werden nach den Praxistests bewertet.</div>
+              <div className="mt-2 text-sm font-bold text-white/55">
+                statt <span className="line-through">186 €</span> pro Jahr · ca. 30 % sparen
               </div>
-              <div className="rounded-xl bg-white/5 px-4 py-4">
-                <div className="text-sm font-black mb-1">Boniersystem bleibt ein Kernpunkt</div>
-                <div className="text-xs text-white/55 leading-relaxed">Das POS-Modul wird besonders auf Vereinsfeste, Verkaufssituationen und Tagesauswertungen ausgerichtet.</div>
-              </div>
+            </div>
+            <p className="text-sm text-white/60 leading-relaxed mb-6">
+              Der richtige Tarif, wenn Projekte, Veranstaltungen, Rollen, Auswertungen und das Boniersystem ernsthaft genutzt werden.
+            </p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-1 gap-3">
+              {includedModules.map((feature) => (
+                <div key={feature} className="flex items-center gap-3 rounded-xl bg-white/5 px-4 py-3">
+                  <span className="w-2 h-2 rounded-full bg-[#B5A47A] flex-shrink-0" />
+                  <span className="text-sm font-bold text-white/75">{feature}</span>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -378,11 +378,31 @@ const Preise: React.FC = () => (
               onClick={() => scrollToSection('vormerken')}
               className="w-full py-4 rounded-xl bg-[#B5A47A] text-black text-sm font-black uppercase tracking-wide"
             >
-              Alpha vormerken
+              Pro-Version vormerken
             </button>
             <p className="text-xs text-white/40 text-center leading-relaxed">
-              Die finale Preisstruktur wird veröffentlicht, sobald die Testphase genug belastbare Rückmeldungen liefert.
+              Der Einführungspreis gilt für frühe Vereine während der Startphase.
             </p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-black/5 p-6 md:p-8 shadow-sm flex flex-col">
+          <div className="text-xs font-black uppercase tracking-widest text-black/40 mb-2">Business</div>
+          <h3 className="text-2xl font-black tracking-tight mb-3">Für größere Strukturen.</h3>
+          <div className="mb-5">
+            <div className="text-4xl font-black tracking-tighter">Coming soon</div>
+            <div className="text-xs font-bold text-black/45 mt-1">für individuelle Anforderungen</div>
+          </div>
+          <p className="text-sm text-black/55 leading-relaxed mb-6">
+            Sinnvoll, wenn mehrere Organisationen, Sondermodule, erweiterte Betreuung oder individuelle Anpassungen notwendig sind.
+          </p>
+          <div className="space-y-3 mt-auto">
+            {['Individuelle Einrichtung', 'Erweiterte Modulplanung', 'Mehrere Organisationen', 'Persönliche Abstimmung'].map((feature) => (
+              <div key={feature} className="flex items-center gap-3 rounded-xl bg-[#F6F1E4] px-4 py-3">
+                <span className="w-2 h-2 rounded-full bg-[#B5A47A] flex-shrink-0" />
+                <span className="text-sm font-bold text-black/70">{feature}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
