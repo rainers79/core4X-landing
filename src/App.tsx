@@ -321,7 +321,7 @@ const Preise: React.FC = () => (
         <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Pakete & Preise</div>
         <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Klare Pakete. Fairer Einstieg.</h2>
         <p className="mt-4 text-black/55 font-medium max-w-2xl mx-auto text-sm md:text-base">
-          Core4X startet mit einem kostenlosen Basic-Paket und einer Pro-Version für Vereine, die mehr Struktur, Zusatzmodule und ein starkes Boniersystem brauchen.
+          Core4X startet mit einem kostenlosen Basic-Paket. Die Pro-Version ist für Vereine gedacht, die Projekte, Rollen, Belege, Auswertungen und das Boniersystem ernsthaft operativ nutzen wollen.
         </p>
       </div>
 
@@ -337,7 +337,7 @@ const Preise: React.FC = () => (
             Geeignet für kleine Vereine, erste Tests und einfache Organisationsabläufe ohne unnötige Einstiegshürde.
           </p>
           <div className="space-y-3 mt-auto">
-            {['Projekte und Aufgaben', 'Kalender und Umfragen', 'Mitgliederverwaltung', 'Kostenloser Einstieg'].map((feature) => (
+            {['Projekte', 'Kalender', 'Aufgaben', 'Umfragen'].map((feature) => (
               <div key={feature} className="flex items-center gap-3 rounded-xl bg-[#F6F1E4] px-4 py-3">
                 <span className="w-2 h-2 rounded-full bg-[#B5A47A] flex-shrink-0" />
                 <span className="text-sm font-bold text-black/70">{feature}</span>
@@ -361,7 +361,7 @@ const Preise: React.FC = () => (
               </div>
             </div>
             <p className="text-sm text-white/60 leading-relaxed mb-6">
-              Der richtige Tarif, wenn Projektmodule, Rollen, Belege, Einkauf, Auswertungen und das Boniersystem ernsthaft genutzt werden.
+              Der richtige Tarif, wenn Projekte, Veranstaltungen, Rollen, Auswertungen und das Boniersystem ernsthaft genutzt werden.
             </p>
             <div className="grid sm:grid-cols-2 lg:grid-cols-1 gap-3">
               {includedModules.map((feature) => (
@@ -381,7 +381,7 @@ const Preise: React.FC = () => (
               Pro-Version vormerken
             </button>
             <p className="text-xs text-white/40 text-center leading-relaxed">
-              Der Einführungspreis gilt für frühe Vereine während der Startphase: 126 € statt 180 € pro Jahr.
+              Der Einführungspreis entspricht 30 % Rabatt auf den regulären Jahrespreis von 180 €.
             </p>
           </div>
         </div>
@@ -394,7 +394,7 @@ const Preise: React.FC = () => (
             <div className="text-xs font-bold text-black/45 mt-1">für individuelle Anforderungen</div>
           </div>
           <p className="text-sm text-black/55 leading-relaxed mb-6">
-            Sinnvoll, wenn mehrere Organisationen, Sondermodule, erweiterte Betreuung oder individuelle Anpassungen notwendig sind.
+            Business wird bewusst noch nicht verkauft. Erst Basic stabil in den Store bringen, dann Pro sauber verkaufen, danach Business ausbauen.
           </p>
           <div className="space-y-3 mt-auto">
             {['Individuelle Einrichtung', 'Erweiterte Modulplanung', 'Mehrere Organisationen', 'Persönliche Abstimmung'].map((feature) => (
