@@ -1,0 +1,38 @@
+name: Generate Landing Dependency Lock
+
+on:
+  push:
+    branches:
+      - security/pre-sale-hardening-2026-08-14
+    paths:
+      - ".github/workflows/generate-lock.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout security branch
+        uses: actions/checkout@v4
+        with:
+          ref: security/pre-sale-hardening-2026-08-14
+
+      - name: Generate deterministic npm lock
+        run: npm install --package-lock-only --ignore-scripts
+
+      - name: Commit package lock
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          if git diff --cached --quiet; then
+            echo "package-lock.json already current."
+            exit 0
+          fi
+          git commit -m "Lock landing page dependencies"
+          git push origin HEAD:security/pre-sale-hardening-2026-08-14
