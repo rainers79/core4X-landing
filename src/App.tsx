@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'https://api.schmidt-kottingbrunn.at/wp-json/core4x/v1').replace(/\/$/, '')
+const APP_LEGAL_BASE = 'https://app.schmidt-kottingbrunn.at'
 
 interface PreregisterForm {
   first_name: string
@@ -235,7 +236,10 @@ const Vormerken: React.FC = () => {
             <button onClick={handleSubmit} disabled={loading} className="w-full py-4 rounded-xl bg-[#1A1A1A] text-white text-sm font-black uppercase tracking-wide disabled:opacity-50">
               {loading ? 'Wird gesendet...' : 'Für Alpha vormerken'}
             </button>
-            <p className="text-xs text-black/30 text-center">Keine Zahlung erforderlich. Nur eine Vormerkung.</p>
+            <p className="text-xs text-black/40 text-center leading-relaxed">
+              Keine Zahlung erforderlich. Nur eine Vormerkung. Informationen zur Verarbeitung deiner Angaben findest du in der{' '}
+              <a href={`${APP_LEGAL_BASE}/privacy.html`} target="_blank" rel="noreferrer" className="font-bold underline">Datenschutzerklärung</a>.
+            </p>
           </div>
         )}
       </div>
@@ -271,7 +275,6 @@ const Features: React.FC = () => (
     </div>
   </section>
 )
-
 
 const Zukunft: React.FC = () => (
   <section id="zukunft" className="py-24 px-5 bg-[#111318] text-white overflow-hidden">
@@ -445,36 +448,31 @@ const App: React.FC = () => {
           <div className="text-xs text-black/30 font-medium">
             {new Date().getFullYear()} Core4X. Alle Rechte vorbehalten.
           </div>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap justify-center gap-5">
             <button onClick={() => setShowImpressum(true)} className="text-xs font-semibold text-black/40 hover:text-black">Impressum</button>
             <button onClick={() => setShowDatenschutz(true)} className="text-xs font-semibold text-black/40 hover:text-black">Datenschutz</button>
+            <a href={`${APP_LEGAL_BASE}/terms.html`} target="_blank" rel="noreferrer" className="text-xs font-semibold text-black/40 hover:text-black">Nutzungsbedingungen</a>
           </div>
         </div>
       </footer>
 
       {showImpressum && (
         <Modal title="Impressum" onClose={() => setShowImpressum(false)}>
-          <p className="font-bold">Angaben gemäß § 5 ECG</p>
-          <p>Schmidt Rainer<br />Friedrich Schmolka-Strasse 12<br />2542 Kottingbrunn<br />Österreich</p>
-          <p>E-Mail: rainer@schmidt-kottingbrunn.at<br />Telefon: +43 676 4808464</p>
-          <p>Diese Website wird privat betrieben und dient der Vorstellung des Softwareprodukts Core4X.</p>
+          <p className="font-bold">Medieninhaber und Betreiber</p>
+          <p>Rainer Schmidt<br />Friedrich-Schmolka-Straße 12<br />2542 Kottingbrunn<br />Österreich</p>
+          <p>E-Mail: rainer@schmidt-kottingbrunn.at</p>
+          <p>Entwicklung, Bereitstellung und Betrieb der Softwareplattform Core4X für Vereins-, Community-, Projekt-, Kommunikations-, Verwaltungs- und POS-Funktionen.</p>
+          <p><a href={`${APP_LEGAL_BASE}/imprint.html`} target="_blank" rel="noreferrer" className="font-bold underline">Vollständiges Impressum öffnen</a></p>
         </Modal>
       )}
 
       {showDatenschutz && (
         <Modal title="Datenschutzerklärung" onClose={() => setShowDatenschutz(false)}>
           <p className="font-bold">Verantwortlicher</p>
-          <p>Schmidt Rainer<br />Friedrich Schmolka-Strasse 12<br />2542 Kottingbrunn<br />rainer@schmidt-kottingbrunn.at</p>
-          <p className="font-bold">Welche Daten wir sammeln</p>
-          <p>Im Rahmen der Alpha-Voranmeldung erfassen wir folgende Daten: Vorname, Nachname, E-Mail-Adresse, Telefonnummer und Vereins- bzw. Organisationsname. Die Angabe dieser Daten erfolgt freiwillig.</p>
-          <p className="font-bold">Zweck der Verarbeitung</p>
-          <p>Die erhobenen Daten werden ausschließlich verwendet, um Sie über den Start der Alpha-Phase und weitere Entwicklungen von Core4X zu informieren.</p>
-          <p className="font-bold">Speicherung</p>
-          <p>Ihre Daten werden auf einem Server von World4You Internet Services GmbH in Österreich gespeichert.</p>
-          <p className="font-bold">Ihre Rechte</p>
-          <p>Sie haben jederzeit das Recht auf Auskunft über Ihre gespeicherten Daten, sowie das Recht auf Berichtigung, Löschung oder Einschränkung der Verarbeitung. Bitte wenden Sie sich dazu an: rainer@schmidt-kottingbrunn.at</p>
-          <p className="font-bold">Keine Weitergabe</p>
-          <p>Ihre Daten werden nicht an Dritte weitergegeben.</p>
+          <p>Rainer Schmidt<br />Friedrich-Schmolka-Straße 12<br />2542 Kottingbrunn<br />Österreich<br />rainer@schmidt-kottingbrunn.at</p>
+          <p>Bei der Voranmeldung verarbeiten wir die von dir angegebenen Kontakt- und Organisationsdaten, um deine Vormerkung zu bearbeiten und dich zum vorgesehenen Einstieg in Core4X zu kontaktieren.</p>
+          <p>Die vollständigen Informationen zu Zwecken, Rechtsgrundlagen, Empfängern, Speicherfristen und Betroffenenrechten findest du in der aktuellen Core4X-Datenschutzerklärung.</p>
+          <p><a href={`${APP_LEGAL_BASE}/privacy.html`} target="_blank" rel="noreferrer" className="font-bold underline">Vollständige Datenschutzerklärung öffnen</a></p>
         </Modal>
       )}
     </div>
