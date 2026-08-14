@@ -1,0 +1,66 @@
+name: Apply Preregistration Honeypot
+
+on:
+  push:
+    branches:
+      - security/pre-sale-hardening-2026-08-14
+    paths:
+      - ".github/workflows/apply-preregister-honeypot.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout security branch
+        uses: actions/checkout@v4
+        with:
+          ref: security/pre-sale-hardening-2026-08-14
+
+      - name: Add honeypot field
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/App.tsx')
+          text = path.read_text()
+
+          interface_marker = """  phone: string\n  company: string\n}"""
+          interface_replacement = """  phone: string\n  company: string\n  website: string\n}"""
+          if interface_marker not in text:
+              raise SystemExit('Preregister interface marker not found')
+          text = text.replace(interface_marker, interface_replacement, 1)
+
+          state_marker = """    phone: '',\n    company: '',\n  })"""
+          state_replacement = """    phone: '',\n    company: '',\n    website: '',\n  })"""
+          if state_marker not in text:
+              raise SystemExit('Preregister state marker not found')
+          text = text.replace(state_marker, state_replacement, 1)
+
+          form_marker = """          <div className=\"bg-[#F6F1E4] rounded-2xl p-6 md:p-8 space-y-4\">\n            <div className=\"grid grid-cols-1 sm:grid-cols-2 gap-4\">"""
+          form_replacement = """          <div className=\"bg-[#F6F1E4] rounded-2xl p-6 md:p-8 space-y-4\">\n            <div aria-hidden=\"true\" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>\n              <label>Website\n                <input\n                  name=\"website\"\n                  value={form.website}\n                  onChange={handleChange}\n                  tabIndex={-1}\n                  autoComplete=\"off\"\n                />\n              </label>\n            </div>\n            <div className=\"grid grid-cols-1 sm:grid-cols-2 gap-4\">"""
+          if form_marker not in text:
+              raise SystemExit('Preregister form marker not found')
+          text = text.replace(form_marker, form_replacement, 1)
+
+          path.write_text(text)
+          PY
+
+      - name: Build landing page
+        run: |
+          npm ci
+          npm run build
+
+      - name: Commit patch and remove one-time workflow
+        run: |
+          set -euo pipefail
+          rm .github/workflows/apply-preregister-honeypot.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/App.tsx .github/workflows/apply-preregister-honeypot.yml
+          git commit -m "Add preregistration honeypot field"
+          git push origin HEAD:security/pre-sale-hardening-2026-08-14
