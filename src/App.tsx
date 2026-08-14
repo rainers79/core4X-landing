@@ -8,6 +8,7 @@ interface PreregisterForm {
   email: string
   phone: string
   company: string
+  website: string
 }
 
 const scrollToSection = (id: string) => {
@@ -138,6 +139,7 @@ const Vormerken: React.FC = () => {
     email: '',
     phone: '',
     company: '',
+    website: '',
   })
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -194,6 +196,17 @@ const Vormerken: React.FC = () => {
           </div>
         ) : (
           <div className="bg-[#F6F1E4] rounded-2xl p-6 md:p-8 space-y-4">
+            <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
+              <label>Website
+                <input
+                  name="website"
+                  value={form.website}
+                  onChange={handleChange}
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+              </label>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-black uppercase tracking-wider text-black/40 mb-1 block">Vorname *</label>
