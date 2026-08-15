@@ -55,7 +55,7 @@ const Nav: React.FC = () => {
           </span>
         </div>
         <div className="hidden md:flex items-center gap-8">
-          <button onClick={() => scrollTo('vormerken')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Alpha</button>
+          <button onClick={() => scrollTo('vormerken')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Verfügbar</button>
           <button onClick={() => scrollTo('features')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Funktionen</button>
           <button onClick={() => scrollTo('zukunft')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Zukunft</button>
           <button onClick={() => scrollTo('preise')} className="text-sm font-semibold text-black/60 hover:text-black transition-colors">Preise</button>
@@ -64,7 +64,7 @@ const Nav: React.FC = () => {
           onClick={() => scrollTo('vormerken')}
           className="hidden md:block px-4 py-2 rounded-xl bg-[#B5A47A] text-black text-sm font-black uppercase tracking-wide"
         >
-          Alpha vormerken
+          Interesse anmelden
         </button>
         <button className="md:hidden p-2" onClick={() => setMenuOpen(!menuOpen)}>
           <div className="w-5 h-0.5 bg-black mb-1" />
@@ -74,7 +74,7 @@ const Nav: React.FC = () => {
       </div>
       {menuOpen && (
         <div className="md:hidden bg-[#F6F1E4] border-t border-black/5 px-5 py-4 space-y-3">
-          <button onClick={() => scrollTo('vormerken')} className="block text-sm font-semibold">Alpha vormerken</button>
+          <button onClick={() => scrollTo('vormerken')} className="block text-sm font-semibold">Interesse anmelden</button>
           <button onClick={() => scrollTo('features')} className="block text-sm font-semibold">Funktionen</button>
           <button onClick={() => scrollTo('zukunft')} className="block text-sm font-semibold">Zukunft</button>
           <button onClick={() => scrollTo('preise')} className="block text-sm font-semibold">Preise</button>
@@ -89,7 +89,7 @@ const Hero: React.FC = () => {
     <section className="min-h-screen flex items-center justify-center px-5 pt-16 overflow-hidden">
       <div className="max-w-4xl mx-auto text-center w-full">
         <div className="inline-block px-4 py-1.5 rounded-full bg-[#B5A47A]/20 text-[#9A8A60] text-xs font-black uppercase tracking-widest mb-6">
-          Alpha in Vorbereitung
+          Core4X jetzt verfügbar
         </div>
         <h1 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter leading-tight mb-6">
           Vereinsmanagement
@@ -111,7 +111,7 @@ const Hero: React.FC = () => {
             onClick={() => scrollToSection('vormerken')}
             className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#B5A47A]/20 text-black text-sm font-black uppercase tracking-wide"
           >
-            Alpha vormerken
+            Interesse anmelden
           </button>
         </div>
         <div className="mt-16 grid grid-cols-3 gap-4 max-w-lg mx-auto px-4">
@@ -183,17 +183,17 @@ const Vormerken: React.FC = () => {
     <section id="vormerken" className="py-24 px-5 bg-white">
       <div className="max-w-xl mx-auto">
         <div className="text-center mb-12">
-          <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Alpha-Phase</div>
-          <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Jetzt vormerken.</h2>
+          <div className="text-xs font-black uppercase tracking-widest text-[#B5A47A] mb-3">Jetzt verfügbar</div>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Core4X jetzt nutzen.</h2>
           <p className="mt-4 text-black/50 font-medium text-sm md:text-base">
-            Core4X wird praxisnah weiterentwickelt. Interessierte Vereine können sich für die Alpha vormerken lassen.
+            Core4X wird praxisnah weiterentwickelt. Interessierte Vereine können sich für die Interesse anmelden lassen.
           </p>
         </div>
         {success ? (
           <div className="text-center py-12">
             <div className="text-5xl mb-4">🎉</div>
-            <h3 className="text-2xl font-black mb-2">Du bist dabei!</h3>
-            <p className="text-black/50">Wir melden uns, sobald der nächste Testschritt startet.</p>
+            <h3 className="text-2xl font-black mb-2">Danke für dein Interesse!</h3>
+            <p className="text-black/50">Wir melden uns mit den nächsten Schritten für deinen Core4X-Einstieg.</p>
           </div>
         ) : (
           <div className="bg-[#F6F1E4] rounded-2xl p-6 md:p-8 space-y-4">
@@ -234,10 +234,10 @@ const Vormerken: React.FC = () => {
               <div className="px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm font-semibold">{error}</div>
             )}
             <button onClick={handleSubmit} disabled={loading} className="w-full py-4 rounded-xl bg-[#1A1A1A] text-white text-sm font-black uppercase tracking-wide disabled:opacity-50">
-              {loading ? 'Wird gesendet...' : 'Für Alpha vormerken'}
+              {loading ? 'Wird gesendet...' : 'Für Interesse anmelden'}
             </button>
             <p className="text-xs text-black/40 text-center leading-relaxed">
-              Keine Zahlung erforderlich. Nur eine Vormerkung. Informationen zur Verarbeitung deiner Angaben findest du in der{' '}
+              Die Interessensmeldung ist unverbindlich und kostenlos. Informationen zur Verarbeitung deiner Angaben findest du in der{' '}
               <a href={`${APP_LEGAL_BASE}/privacy.html`} target="_blank" rel="noreferrer" className="font-bold underline">Datenschutzerklärung</a>.
             </p>
           </div>
@@ -394,7 +394,7 @@ const Preise: React.FC = () => (
               onClick={() => scrollToSection('vormerken')}
               className="w-full py-4 rounded-xl bg-[#B5A47A] text-black text-sm font-black uppercase tracking-wide"
             >
-              Pro-Version vormerken
+              Pro-Interesse anmelden
             </button>
             <p className="text-xs text-white/40 text-center leading-relaxed">
               Der Einführungspreis entspricht 30 % Rabatt auf den regulären Jahrespreis von 180 €.
