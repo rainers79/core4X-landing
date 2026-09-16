@@ -1,4 +1,18 @@
 (() => {
+  const LOCAL_LOGO = '/core4x-icon-512.png?v=20260916-2'
+  const REMOTE_LOGO = 'https://app.core4xapp.com/icon-512.png'
+
+  const syncBrandLogo = () => {
+    let changed = false
+    document.querySelectorAll('img').forEach((img) => {
+      if (img.src === REMOTE_LOGO || img.getAttribute('src') === REMOTE_LOGO) {
+        img.src = LOCAL_LOGO
+        changed = true
+      }
+    })
+    return changed
+  }
+
   const addAccountDeletionLink = () => {
     const footer = document.querySelector('footer')
     if (!footer || footer.querySelector('a[href="/account-deletion.html"]')) return false
@@ -17,10 +31,12 @@
     return true
   }
 
-  const observer = new MutationObserver(() => {
-    if (addAccountDeletionLink()) observer.disconnect()
-  })
+  const applyFixes = () => {
+    syncBrandLogo()
+    addAccountDeletionLink()
+  }
 
+  const observer = new MutationObserver(applyFixes)
   observer.observe(document.documentElement, { childList: true, subtree: true })
-  addAccountDeletionLink()
+  applyFixes()
 })()
