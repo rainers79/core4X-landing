@@ -2,10 +2,10 @@ import React, { useState } from 'react'
 
 const APP_BASE = 'https://app.core4xapp.com'
 const APP_LEGAL_BASE = 'https://app.core4xapp.com'
+const BRAND_ICON = `${APP_BASE}/icon-512.png`
 
 const STRIPE_LINKS = {
   pro: import.meta.env.VITE_STRIPE_PRO_URL || '',
-  business: import.meta.env.VITE_STRIPE_BUSINESS_URL || '',
   event48: import.meta.env.VITE_STRIPE_EVENT48_URL || '',
 }
 
@@ -40,7 +40,7 @@ const Nav: React.FC = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#F7F3E8]/90 backdrop-blur-xl border-b border-black/5">
       <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
         <button onClick={() => go('top')} className="flex items-center gap-3">
-          <img src="/core4x-icon-512.png" alt="Core4X" className="h-9 w-9 rounded-xl shadow-sm" width={36} height={36} />
+          <img src={BRAND_ICON} alt="Core4X" className="h-10 w-10 rounded-xl object-contain shadow-sm" width={40} height={40} />
           <span className="text-xl font-black tracking-tight">Core<span className="text-[#B5A47A]">4X</span></span>
         </button>
 
@@ -89,23 +89,18 @@ const Hero: React.FC = () => (
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-[-0.055em] leading-[0.95] max-w-4xl">
           Ein System für den ganzen <span className="text-[#A9986D]">Vereinsalltag.</span>
         </h1>
-        <p className="mt-7 text-base md:text-xl text-black/58 font-medium leading-relaxed max-w-2xl">
+        <p className="mt-7 text-base md:text-xl text-black/60 font-medium leading-relaxed max-w-2xl">
           Core4X verbindet Organisation, Kommunikation, Projekte, Veranstaltungen und Boniersystem in einer mobilen Plattform. Weniger Insellösungen, weniger Abstimmungschaos, mehr Überblick.
         </p>
         <div className="mt-8 flex flex-col sm:flex-row gap-3">
-          <button onClick={() => scrollToSection('preise')} className="px-7 py-4 rounded-2xl bg-[#1A1A1A] text-white text-sm font-black uppercase tracking-wide shadow-xl">
-            Tarife ansehen
-          </button>
-          <button onClick={() => scrollToSection('features')} className="px-7 py-4 rounded-2xl bg-white border border-black/5 text-black text-sm font-black uppercase tracking-wide">
-            Funktionen entdecken
-          </button>
+          <button onClick={() => scrollToSection('preise')} className="px-7 py-4 rounded-2xl bg-[#1A1A1A] text-white text-sm font-black uppercase tracking-wide shadow-xl">Tarife ansehen</button>
+          <button onClick={() => scrollToSection('features')} className="px-7 py-4 rounded-2xl bg-white border border-black/5 text-black text-sm font-black uppercase tracking-wide">Funktionen entdecken</button>
         </div>
-
         <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-xs font-bold text-black/45">
           <span>✓ Basic kostenlos</span>
           <span>✓ Pro für aktive Vereine</span>
+          <span>✓ Business in Vorbereitung</span>
           <span>✓ 48h Event Pass</span>
-          <span>✓ Stripe Checkout</span>
         </div>
       </div>
 
@@ -117,7 +112,7 @@ const Hero: React.FC = () => (
               <div className="text-[10px] uppercase tracking-[0.2em] text-white/35 font-black">Core4X Plattform</div>
               <div className="text-white text-xl font-black mt-1">Alles dort, wo es gebraucht wird.</div>
             </div>
-            <img src="/core4x-icon-512.png" alt="Core4X App Icon" className="w-14 h-14 rounded-2xl" />
+            <img src={BRAND_ICON} alt="Core4X App Icon" className="w-16 h-16 rounded-2xl object-contain" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             {['Projekte', 'Kalender', 'Aufgaben', 'Mitglieder', 'Rechnungen', 'Boniersystem'].map((item, index) => (
@@ -153,7 +148,6 @@ const Features: React.FC = () => (
         <h2 className="text-3xl md:text-5xl font-black tracking-[-0.04em]">Nicht noch eine App. Eine gemeinsame Arbeitsplattform.</h2>
         <p className="mt-5 text-black/50 font-medium leading-relaxed">Core4X bildet die Abläufe ab, die im Vereinsbetrieb tatsächlich zusammengehören – von der Planung bis zum Verkauf bei der Veranstaltung.</p>
       </div>
-
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {features.map(([title, description], index) => (
           <div key={title} className="group rounded-[1.5rem] border border-black/5 bg-[#FAF8F2] p-6 hover:-translate-y-1 transition-transform">
@@ -170,15 +164,17 @@ const Features: React.FC = () => (
 const CheckoutButton: React.FC<{ plan: StripePlan; children: React.ReactNode; light?: boolean }> = ({ plan, children, light }) => {
   const checkout = () => {
     const url = STRIPE_LINKS[plan]
-    if (url) {
-      window.location.href = url
-      return
-    }
-    scrollToSection('kontakt')
+    if (url) window.location.href = url
   }
 
+  const disabled = !STRIPE_LINKS[plan]
+
   return (
-    <button onClick={checkout} className={`w-full py-4 rounded-xl text-sm font-black uppercase tracking-wide transition-transform hover:-translate-y-0.5 ${light ? 'bg-white text-black' : 'bg-[#1A1A1A] text-white'}`}>
+    <button
+      onClick={checkout}
+      disabled={disabled}
+      className={`w-full py-4 rounded-xl text-sm font-black uppercase tracking-wide transition-transform ${disabled ? 'cursor-not-allowed opacity-45' : 'hover:-translate-y-0.5'} ${light ? 'bg-white text-black' : 'bg-[#1A1A1A] text-white'}`}
+    >
       {children}
     </button>
   )
@@ -219,19 +215,19 @@ const PreisCard: React.FC<{
 const Preise: React.FC = () => (
   <section id="preise" className="py-24 px-5 bg-[#F7F3E8]">
     <div className="max-w-7xl mx-auto">
-      <div className="text-center max-w-3xl mx-auto mb-14">
-        <div className="text-xs font-black uppercase tracking-[0.18em] text-[#9A8A60] mb-3">Tarife</div>
-        <h2 className="text-3xl md:text-5xl font-black tracking-[-0.04em]">Vom Einstieg bis zum Veranstaltungsbetrieb.</h2>
-        <p className="mt-5 text-black/50 font-medium">Basic zum Starten, Pro für den laufenden Vereinsbetrieb, Business für größere Anforderungen und der 48h Event Pass für einzelne Veranstaltungen.</p>
+      <div className="text-center max-w-3xl mx-auto mb-12">
+        <div className="text-xs font-black uppercase tracking-[0.18em] text-[#9A8A60] mb-3">Tarife & Preise</div>
+        <h2 className="text-3xl md:text-5xl font-black tracking-[-0.04em]">Drei Tarife. Auf einen Blick.</h2>
+        <p className="mt-5 text-black/50 font-medium">Basic für den Einstieg, Pro für den aktiven Vereinsbetrieb und Business für größere Strukturen.</p>
       </div>
 
-      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5 items-stretch">
+      <div className="grid lg:grid-cols-3 gap-5 items-stretch">
         <PreisCard
           eyebrow="Basic"
-          title="Kostenlos starten"
+          title="Einfach starten"
           price="0 €"
           cadence="dauerhaft kostenlos"
-          description="Für kleine Vereine und den Einstieg in die digitale Organisation."
+          description="Für kleine Vereine, Tests und einfache digitale Organisation."
           features={['Projekte', 'Kalender', 'Aufgaben', 'Umfragen', 'Grundfunktionen für Mitglieder']}
           action={<a href={APP_BASE} className="w-full py-4 rounded-xl bg-[#F0ECE1] text-black text-sm font-black uppercase tracking-wide text-center">Kostenlos starten</a>}
         />
@@ -239,41 +235,52 @@ const Preise: React.FC = () => (
         <PreisCard
           eyebrow="Pro"
           title="Für aktive Vereine"
-          price="126 €"
-          cadence="pro Jahr · Einführungspreis statt 180 €"
+          price="129 €"
+          cadence="pro Jahr · statt 180 €"
           description="Der Haupttarif für Vereine, die Core4X regelmäßig operativ einsetzen."
           features={['Alle Basic-Funktionen', 'Mitglieder & Rollen', 'Kernteam & Einkauf', 'Rechnungen & Belege', 'Boniersystem / POS', 'Auswertungen & Archiv']}
           featured
-          badge="30 % Startvorteil"
+          badge="51 € Startvorteil"
           action={<CheckoutButton plan="pro" light>Pro kaufen</CheckoutButton>}
         />
 
         <PreisCard
           eyebrow="Business"
           title="Für größere Strukturen"
-          price="Business"
-          cadence="Preis nach Funktionsumfang"
+          price="Coming soon"
+          cadence="Preis und Start werden bekanntgegeben"
           description="Für Organisationen mit erweiterten Anforderungen, mehreren Bereichen oder zusätzlicher Betreuung."
           features={['Alle Pro-Funktionen', 'Erweiterte Rechte & Strukturen', 'Mehrere Organisationsbereiche', 'Erweiterte Auswertungen', 'Priorisierte Betreuung']}
-          action={<CheckoutButton plan="business">Business anfragen</CheckoutButton>}
+          badge="Coming soon"
+          action={<button disabled className="w-full py-4 rounded-xl bg-[#EAE6DA] text-black/40 text-sm font-black uppercase tracking-wide cursor-not-allowed">Noch nicht verfügbar</button>}
         />
+      </div>
 
-        <PreisCard
-          eyebrow="48h Event Pass"
-          title="Ein Event. Volle Leistung."
-          price="48h"
-          cadence="einmalige Freischaltung"
-          description="Für Vereine, die Core4X bei einer einzelnen Veranstaltung mit erweiterten Funktionen einsetzen wollen."
-          features={['48 Stunden Freischaltung', 'Boniersystem / POS', 'Tische & Artikel', 'Zahlungen & Tagesübersicht', 'Keine Jahresbindung']}
-          badge="Event"
-          action={<CheckoutButton plan="event48">48h Pass kaufen</CheckoutButton>}
-        />
+      <div className="mt-6 rounded-[1.75rem] bg-[#111318] text-white p-6 md:p-8 border border-[#B5A47A]/30 shadow-xl">
+        <div className="grid lg:grid-cols-[1.15fr_.85fr] gap-8 items-center">
+          <div>
+            <div className="inline-flex rounded-full bg-[#B5A47A] text-black px-3 py-1 text-[10px] font-black uppercase tracking-wide mb-4">48h Event Pass</div>
+            <h3 className="text-2xl md:text-3xl font-black tracking-tight">Ein Event. 48 Stunden. Volle Event-Funktionen.</h3>
+            <p className="mt-3 text-white/60 text-sm leading-relaxed max-w-2xl">Für einzelne Veranstaltungen ohne Jahresbindung – inklusive Boniersystem, Tische, Artikel, Zahlungen und Tagesübersicht.</p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {['Boniersystem / POS', 'Tische & Artikel', 'Zahlungen', 'Tagesübersicht', '48h Freischaltung'].map((item) => (
+                <span key={item} className="px-3 py-2 rounded-xl bg-white/[0.06] border border-white/10 text-xs font-bold text-white/75">✓ {item}</span>
+              ))}
+            </div>
+          </div>
+          <div className="lg:text-right">
+            <div className="text-[11px] font-black uppercase tracking-[0.18em] text-[#D6C28B]">Einmaliger Event-Tarif</div>
+            <div className="text-4xl font-black tracking-[-0.04em] mt-2">Preis folgt</div>
+            <div className="text-xs text-white/40 font-bold mt-1">keine Jahresbindung</div>
+            <div className="mt-5 max-w-sm lg:ml-auto"><CheckoutButton plan="event48" light>48h Pass kaufen</CheckoutButton></div>
+          </div>
+        </div>
       </div>
 
       <div className="mt-8 rounded-2xl bg-white border border-black/5 p-5 md:p-6 flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
         <div>
           <div className="font-black">Sicher bezahlen über Stripe</div>
-          <div className="text-sm text-black/50 mt-1">Je nach Verfügbarkeit und Land können Karte, Apple Pay, Google Pay, PayPal, EPS, SEPA und weitere Verfahren im Checkout angeboten werden.</div>
+          <div className="text-sm text-black/50 mt-1">Im Checkout können – abhängig von Land und Verfügbarkeit – Karte, Apple Pay, Google Pay, PayPal, EPS, SEPA und weitere Verfahren angeboten werden.</div>
         </div>
         <div className="flex flex-wrap gap-2 text-[11px] font-black uppercase tracking-wide text-black/45">
           {['Visa', 'Mastercard', 'Apple Pay', 'Google Pay', 'PayPal', 'EPS', 'SEPA'].map((item) => <span key={item} className="px-3 py-2 rounded-lg bg-[#F7F3E8]">{item}</span>)}
@@ -284,32 +291,30 @@ const Preise: React.FC = () => (
 )
 
 const comparisonRows = [
-  ['Projekte, Kalender, Aufgaben', '✓', '✓', '✓', '✓'],
-  ['Umfragen', '✓', '✓', '✓', '✓'],
-  ['Mitglieder & Rollen', 'Basis', '✓', '✓', 'Event'],
-  ['Rechnungen & Belege', '–', '✓', '✓', '–'],
-  ['Boniersystem / POS', 'Limitiert', '✓', '✓', '✓'],
-  ['Auswertungen & Archiv', 'Basis', '✓', 'Erweitert', 'Event'],
-  ['Laufzeit', 'Unbegrenzt', '1 Jahr', 'Flexibel', '48 Stunden'],
+  ['Projekte, Kalender, Aufgaben', '✓', '✓', '✓'],
+  ['Umfragen', '✓', '✓', '✓'],
+  ['Mitglieder & Rollen', 'Basis', '✓', '✓'],
+  ['Rechnungen & Belege', '–', '✓', '✓'],
+  ['Boniersystem / POS', 'Limitiert', '✓', '✓'],
+  ['Auswertungen & Archiv', 'Basis', '✓', 'Erweitert'],
+  ['Laufzeit', 'Unbegrenzt', '1 Jahr', 'Flexibel'],
 ]
 
 const Vergleich: React.FC = () => (
   <section id="vergleich" className="py-24 px-5 bg-white">
     <div className="max-w-7xl mx-auto">
       <div className="mb-10">
-        <div className="text-xs font-black uppercase tracking-[0.18em] text-[#9A8A60] mb-3">Direkter Vergleich</div>
-        <h2 className="text-3xl md:text-5xl font-black tracking-[-0.04em]">Welcher Tarif passt zum Einsatz?</h2>
+        <div className="text-xs font-black uppercase tracking-[0.18em] text-[#9A8A60] mb-3">Direkter Tarifvergleich</div>
+        <h2 className="text-3xl md:text-5xl font-black tracking-[-0.04em]">Basic, Pro und Business direkt nebeneinander.</h2>
       </div>
-
       <div className="overflow-x-auto rounded-2xl border border-black/5">
-        <table className="w-full min-w-[760px] text-sm">
+        <table className="w-full min-w-[680px] text-sm">
           <thead className="bg-[#111318] text-white">
             <tr>
               <th className="text-left p-4 font-black">Funktion</th>
               <th className="p-4 font-black">Basic</th>
               <th className="p-4 font-black text-[#D6C28B]">Pro</th>
               <th className="p-4 font-black">Business</th>
-              <th className="p-4 font-black">48h Pass</th>
             </tr>
           </thead>
           <tbody>
@@ -323,6 +328,7 @@ const Vergleich: React.FC = () => (
           </tbody>
         </table>
       </div>
+      <p className="mt-4 text-sm text-black/45">Der 48h Event Pass ist bewusst separat dargestellt, weil er kein dauerhafter Vereinstarif, sondern eine zeitlich begrenzte Event-Freischaltung ist.</p>
     </div>
   </section>
 )
@@ -345,10 +351,10 @@ const Zukunft: React.FC = () => (
 
 const faqItems = [
   ['Kann ich kostenlos starten?', 'Ja. Basic ist für den Einstieg vorgesehen und kann ohne Jahreslizenz genutzt werden.'],
-  ['Wie funktioniert der Pro-Kauf?', 'Der Kauf wird über Stripe Checkout abgewickelt. Nach erfolgreicher Zahlung kann die Lizenz automatisiert dem Core4X-System zugeordnet werden.'],
-  ['Was ist der 48h Event Pass?', 'Eine zeitlich begrenzte Freischaltung für einzelne Veranstaltungen. Sie ist für Vereine gedacht, die insbesondere das Boniersystem und Eventfunktionen ohne Jahresbindung benötigen.'],
-  ['Muss der Owner den Tarif kaufen?', 'Der Kauf kann auch durch einen berechtigten Administrator erfolgen. Entscheidend ist die anschließende Zuordnung der Lizenz zur richtigen Community bzw. Organisation.'],
-  ['Welche Zahlungsarten gibt es?', 'Stripe zeigt im Checkout die für den Kunden und das Land verfügbaren Zahlungsarten an. Vorgesehen sind unter anderem Karten, Wallets, PayPal, EPS und SEPA.'],
+  ['Was kostet Core4X Pro?', 'Der Einführungspreis beträgt 129 € pro Jahr statt regulär 180 €. Das entspricht einem Startvorteil von 51 €.'],
+  ['Wann ist Business verfügbar?', 'Business ist als erweiterter Tarif vorgesehen und aktuell noch nicht verfügbar. Preis und Start werden rechtzeitig bekanntgegeben.'],
+  ['Was ist der 48h Event Pass?', 'Eine zeitlich begrenzte Freischaltung für einzelne Veranstaltungen. Sie ist insbesondere für das Boniersystem und Eventfunktionen ohne Jahresbindung gedacht.'],
+  ['Welche Zahlungsarten gibt es?', 'Der Checkout wird über Stripe abgewickelt. Je nach Land und Verfügbarkeit können unter anderem Karten, Apple Pay, Google Pay, PayPal, EPS und SEPA angeboten werden.'],
 ]
 
 const FAQ: React.FC = () => (
@@ -370,20 +376,6 @@ const FAQ: React.FC = () => (
   </section>
 )
 
-const Kontakt: React.FC = () => (
-  <section id="kontakt" className="py-20 px-5 bg-white">
-    <div className="max-w-5xl mx-auto rounded-[2rem] bg-[#111318] text-white p-7 md:p-12 text-center">
-      <div className="text-xs font-black uppercase tracking-[0.18em] text-[#D6C28B] mb-3">Checkout wird vorbereitet</div>
-      <h2 className="text-3xl md:text-4xl font-black tracking-[-0.04em]">Stripe wird direkt mit Core4X verbunden.</h2>
-      <p className="mt-4 text-white/55 max-w-2xl mx-auto">Bis die finalen Stripe-Payment-Links hinterlegt sind, führt ein noch nicht aktivierter Kaufbutton hierher. Danach startet derselbe Button direkt den sicheren Stripe Checkout.</p>
-      <div className="mt-7 flex flex-col sm:flex-row gap-3 justify-center">
-        <a href="mailto:office@core4xapp.com?subject=Core4X%20Tarif" className="px-6 py-3.5 rounded-xl bg-[#B5A47A] text-black text-sm font-black uppercase tracking-wide">Tarif anfragen</a>
-        <a href={APP_BASE} className="px-6 py-3.5 rounded-xl bg-white/10 text-white text-sm font-black uppercase tracking-wide">Core4X öffnen</a>
-      </div>
-    </div>
-  </section>
-)
-
 const App: React.FC = () => {
   const [showImpressum, setShowImpressum] = useState(false)
   const [showDatenschutz, setShowDatenschutz] = useState(false)
@@ -397,12 +389,11 @@ const App: React.FC = () => {
       <Vergleich />
       <Zukunft />
       <FAQ />
-      <Kontakt />
 
       <footer className="py-10 px-5 border-t border-black/5 bg-white">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5 text-center md:text-left">
           <div className="flex items-center gap-3">
-            <img src="/core4x-icon-512.png" alt="Core4X" className="h-8 w-8 rounded-lg" />
+            <img src={BRAND_ICON} alt="Core4X" className="h-9 w-9 rounded-lg object-contain" />
             <div className="text-lg font-black">Core<span className="text-[#B5A47A]">4X</span></div>
           </div>
           <div className="text-xs text-black/35 font-medium">{new Date().getFullYear()} Core4X. Alle Rechte vorbehalten.</div>
