@@ -166,7 +166,7 @@ type BillingCountry = 'AT' | 'DE'
 type CustomerType = 'association' | 'business' | 'private'
 
 const CheckoutButton: React.FC<{ plan: StripePlan; children: React.ReactNode; light?: boolean; onCheckout: (plan: StripePlan) => void }> = ({ plan, children, light, onCheckout }) => {
-  const disabled = !STRIPE_LINKS[plan]
+  const disabled = !STRIPE_LINKS[plan] && plan !== 'pro'
 
   return (
     <button
@@ -196,6 +196,7 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [testResult, setTestResult] = useState<{ message: string; pdf_url?: string | null } | null>(null)
 
   const setField = (field: keyof typeof form, value: string | boolean) => {
     setForm((current) => ({ ...current, [field]: value }))
@@ -227,12 +228,30 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
       }
 
       const stripeUrl = STRIPE_LINKS[plan]
-      if (!stripeUrl) throw new Error('Der Zahlungslink ist noch nicht eingerichtet.')
+      if (stripeUrl) {
+        const target = new URL(stripeUrl)
+        target.searchParams.set('prefilled_email', form.email)
+        target.searchParams.set('client_reference_id', data.order_key)
+        window.location.href = target.toString()
+        return
+      }
 
-      const target = new URL(stripeUrl)
-      target.searchParams.set('prefilled_email', form.email)
-      target.searchParams.set('client_reference_id', data.order_key)
-      window.location.href = target.toString()
+      if (plan !== 'pro') {
+        throw new Error('Für dieses Produkt ist der Testmodus noch nicht verfügbar.')
+      }
+
+      const testResponse = await fetch(`${API_BASE}/billing/orders/${encodeURIComponent(data.order_key)}/simulate-test-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ test_token: data.test_token }),
+      })
+      const testData = await testResponse.json().catch(() => ({}))
+      if (!testResponse.ok || !testData?.success) {
+        throw new Error(testData?.message || 'Die Testzahlung konnte nicht simuliert werden.')
+      }
+
+      setTestResult({ message: testData.message, pdf_url: testData.pdf_url || null })
+      setLoading(false)
     } catch (err: any) {
       setError(err?.message || 'Die Bestellung konnte nicht vorbereitet werden.')
       setLoading(false)
@@ -327,10 +346,24 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
 
           {error && <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm font-semibold text-red-700">{error}</div>}
 
-          <button type="submit" disabled={loading} className="w-full rounded-xl bg-[#111318] text-white py-4 text-sm font-black uppercase tracking-wide disabled:opacity-50">
-            {loading ? 'Bestellung wird vorbereitet…' : 'Weiter zur sicheren Zahlung'}
-          </button>
-          <p className="text-[11px] text-black/40 text-center">Die Zahlung wird anschließend über Stripe abgewickelt.</p>
+          {testResult && (
+            <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-sm text-emerald-950">
+              <div className="font-black mb-1">Test erfolgreich</div>
+              <div>{testResult.message}</div>
+              {testResult.pdf_url && <a href={testResult.pdf_url} target="_blank" rel="noreferrer" className="inline-block mt-3 font-black underline">Testrechnung als PDF öffnen</a>}
+            </div>
+          )}
+
+          {!testResult && (
+            <button type="submit" disabled={loading} className="w-full rounded-xl bg-[#111318] text-white py-4 text-sm font-black uppercase tracking-wide disabled:opacity-50">
+              {loading ? 'Bestellung wird vorbereitet…' : (STRIPE_LINKS[plan] ? 'Weiter zur sicheren Zahlung' : 'Testzahlung simulieren')}
+            </button>
+          )}
+          <p className="text-[11px] text-black/40 text-center">
+            {STRIPE_LINKS[plan]
+              ? 'Die Zahlung wird anschließend über Stripe abgewickelt.'
+              : 'TESTMODUS: Es findet keine echte Zahlung statt. Die Testrechnung erhält keine echte Rechnungsnummer.'}
+          </p>
         </form>
       </div>
     </div>
