@@ -313,6 +313,13 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
               : 'Österreich: Nach erfolgreicher Zahlung wird die Rechnung automatisch erstellt und an die angegebene E-Mail-Adresse gesendet.'}
           </div>
 
+          <div className="rounded-2xl bg-[#F7F3E8] border border-black/5 p-4 text-sm leading-relaxed">
+            <div className="font-black mb-1">Rechnungssteller</div>
+            <div>Natascha Schmidt</div>
+            <div>Friedrich-Schmolka-Straße 12</div>
+            <div>2542 Kottingbrunn · Österreich</div>
+          </div>
+
           <label className="flex gap-3 items-start text-sm font-semibold">
             <input type="checkbox" checked={form.billing_data_confirmed} onChange={(e) => setField('billing_data_confirmed', e.target.checked)} className="mt-1" />
             <span>Ich bestätige, dass die angegebenen Rechnungsdaten korrekt und vollständig sind.</span>
