@@ -194,10 +194,19 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
     country_code: 'AT' as BillingCountry,
     vat_id: '',
     billing_data_confirmed: false,
+    privacy_notice_acknowledged: false,
   })
   const [loading, setLoading] = useState(false)
+  const [invoiceSending, setInvoiceSending] = useState(false)
   const [error, setError] = useState('')
-  const [testResult, setTestResult] = useState<{ message: string; pdf_url?: string | null } | null>(null)
+  const [testCredentials, setTestCredentials] = useState<{ orderKey: string; testToken: string } | null>(null)
+  const [testResult, setTestResult] = useState<{
+    message: string
+    pdf_url?: string | null
+    payment_email_sent: boolean
+    invoice_email_sent: boolean
+    recipient_email: string
+  } | null>(null)
 
   const setField = (field: keyof typeof form, value: string | boolean) => {
     setForm((current) => ({ ...current, [field]: value }))
@@ -209,6 +218,11 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
 
     if (!form.billing_data_confirmed) {
       setError('Bitte bestätige die Rechnungsdaten.')
+      return
+    }
+
+    if (!form.privacy_notice_acknowledged) {
+      setError('Bitte bestätige, dass du die Datenschutzhinweise gelesen hast.')
       return
     }
 
@@ -241,6 +255,8 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
         throw new Error('Für dieses Produkt ist der Testmodus noch nicht verfügbar.')
       }
 
+      setTestCredentials({ orderKey: data.order_key, testToken: data.test_token })
+
       const testResponse = await fetch(`${API_BASE}/billing/orders/${encodeURIComponent(data.order_key)}/simulate-test-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -251,11 +267,46 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
         throw new Error(testData?.message || 'Die Testzahlung konnte nicht simuliert werden.')
       }
 
-      setTestResult({ message: testData.message, pdf_url: testData.pdf_url || null })
+      setTestResult({
+        message: testData.message,
+        pdf_url: testData.pdf_url || null,
+        payment_email_sent: Boolean(testData.payment_email_sent),
+        invoice_email_sent: Boolean(testData.invoice_email_sent),
+        recipient_email: testData.recipient_email || form.email,
+      })
       setLoading(false)
     } catch (err: any) {
       setError(err?.message || 'Die Bestellung konnte nicht vorbereitet werden.')
       setLoading(false)
+    }
+  }
+
+  const sendReviewedInvoice = async () => {
+    if (!testCredentials || !testResult || invoiceSending) return
+
+    setInvoiceSending(true)
+    setError('')
+    try {
+      const response = await fetch(`${API_BASE}/billing/orders/${encodeURIComponent(testCredentials.orderKey)}/send-test-invoice`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ test_token: testCredentials.testToken }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok || !data?.success) {
+        throw new Error(data?.message || 'Die geprüfte Testrechnung konnte nicht versendet werden.')
+      }
+
+      setTestResult((current) => current ? {
+        ...current,
+        message: data.message,
+        invoice_email_sent: true,
+        recipient_email: data.recipient_email || current.recipient_email,
+      } : current)
+    } catch (err: any) {
+      setError(err?.message || 'Die geprüfte Testrechnung konnte nicht versendet werden.')
+    } finally {
+      setInvoiceSending(false)
     }
   }
 
@@ -327,10 +378,8 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
             <input value={form.vat_id} onChange={(e) => setField('vat_id', e.target.value.toUpperCase())} placeholder={form.country_code === 'DE' ? 'DE123456789' : 'ATU12345678'} className="mt-2 w-full rounded-xl border border-black/10 px-4 py-3 uppercase" />
           </label>
 
-          <div className={`rounded-2xl p-4 text-sm leading-relaxed ${form.country_code === 'DE' ? 'bg-amber-50 border border-amber-200 text-amber-950' : 'bg-emerald-50 border border-emerald-200 text-emerald-950'}`}>
-            {form.country_code === 'DE'
-              ? 'Deutschland: Nach erfolgreicher Zahlung erhältst du zuerst eine Zahlungsbestätigung. Die Rechnung wird vor dem Versand manuell geprüft.'
-              : 'Österreich: Nach erfolgreicher Zahlung wird die Rechnung automatisch erstellt und an die angegebene E-Mail-Adresse gesendet.'}
+          <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 text-sm leading-relaxed text-amber-950">
+            Nach erfolgreicher Zahlung erhältst du automatisch eine Zahlungsbestätigung. Die Rechnung wird anschließend manuell geprüft und in einer zweiten E-Mail an die angegebene Adresse versendet.
           </div>
 
           <div className="rounded-2xl bg-[#F7F3E8] border border-black/5 p-4 text-sm leading-relaxed">
@@ -345,13 +394,33 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
             <span>Ich bestätige, dass die angegebenen Rechnungsdaten korrekt und vollständig sind.</span>
           </label>
 
+          <label className="flex gap-3 items-start text-sm font-semibold">
+            <input type="checkbox" checked={form.privacy_notice_acknowledged} onChange={(e) => setField('privacy_notice_acknowledged', e.target.checked)} className="mt-1" />
+            <span>
+              Ich habe die <a href={`${APP_LEGAL_BASE}/privacy.html`} target="_blank" rel="noreferrer" className="underline">Datenschutzhinweise</a> gelesen. Meine Angaben werden zur Zahlungsabwicklung, Bestellbearbeitung sowie zur Erstellung und Zusendung der Rechnung verarbeitet.
+            </span>
+          </label>
+
           {error && <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm font-semibold text-red-700">{error}</div>}
 
           {testResult && (
             <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-sm text-emerald-950">
-              <div className="font-black mb-1">Test erfolgreich</div>
+              <div className="font-black mb-2">Testablauf</div>
               <div>{testResult.message}</div>
-              {testResult.pdf_url && <a href={testResult.pdf_url} target="_blank" rel="noreferrer" className="inline-block mt-3 font-black underline">Testrechnung als PDF öffnen</a>}
+              <div className="mt-3 rounded-xl bg-white/70 p-3">
+                <div className="font-black">1. Zahlungsbestätigung</div>
+                <div>{testResult.payment_email_sent ? `Automatisch an ${testResult.recipient_email} versendet.` : 'Noch nicht versendet.'}</div>
+              </div>
+              <div className="mt-2 rounded-xl bg-white/70 p-3">
+                <div className="font-black">2. Rechnung nach Prüfung</div>
+                <div>{testResult.invoice_email_sent ? `Als zweite E-Mail an ${testResult.recipient_email} versendet.` : 'Wartet auf deine manuelle Freigabe.'}</div>
+                {testResult.pdf_url && <a href={testResult.pdf_url} target="_blank" rel="noreferrer" className="inline-block mt-2 font-black underline">Testrechnung vor der Freigabe öffnen</a>}
+              </div>
+              {!testResult.invoice_email_sent && (
+                <button type="button" onClick={sendReviewedInvoice} disabled={invoiceSending} className="mt-3 w-full rounded-xl bg-[#111318] px-4 py-3 text-xs font-black uppercase text-white disabled:opacity-50">
+                  {invoiceSending ? 'Testrechnung wird versendet…' : 'Geprüft: zweite Testmail senden'}
+                </button>
+              )}
             </div>
           )}
 
