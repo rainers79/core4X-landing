@@ -7,6 +7,7 @@ const BRAND_ICON = `${APP_BASE}/icon-512.png`
 
 const STRIPE_LINKS = {
   pro: import.meta.env.VITE_STRIPE_PRO_URL || '',
+  business: import.meta.env.VITE_STRIPE_BUSINESS_URL || '',
   event48: import.meta.env.VITE_STRIPE_EVENT48_URL || '',
 }
 
@@ -166,7 +167,7 @@ type BillingCountry = 'AT' | 'DE'
 type CustomerType = 'association' | 'business' | 'private'
 
 const CheckoutButton: React.FC<{ plan: StripePlan; children: React.ReactNode; light?: boolean; onCheckout: (plan: StripePlan) => void }> = ({ plan, children, light, onCheckout }) => {
-  const disabled = !STRIPE_LINKS[plan] && plan !== 'pro'
+  const disabled = !STRIPE_LINKS[plan] && !['pro', 'business'].includes(plan)
 
   return (
     <button
@@ -219,7 +220,7 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
         body: JSON.stringify({
           ...form,
           product_key: plan,
-          billing_cycle: plan === 'event48' ? 'one_time' : 'yearly',
+          billing_cycle: plan === 'event48' ? 'one_time' : plan === 'business' ? 'monthly' : 'yearly',
         }),
       })
       const data = await response.json().catch(() => ({}))
@@ -236,7 +237,7 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
         return
       }
 
-      if (plan !== 'pro') {
+      if (!['pro', 'business'].includes(plan)) {
         throw new Error('Für dieses Produkt ist der Testmodus noch nicht verfügbar.')
       }
 
@@ -265,7 +266,7 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
         <div className="sticky top-0 bg-white/95 backdrop-blur border-b border-black/5 px-5 md:px-7 py-5 flex items-center justify-between">
           <div>
             <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#9A8A60]">Rechnungsdaten</div>
-            <h3 className="text-xl font-black mt-1">{plan === 'event48' ? '48h Event Pass' : 'Core4X Pro'} kaufen</h3>
+            <h3 className="text-xl font-black mt-1">{plan === 'event48' ? '48h Event Pass' : plan === 'business' ? 'Core4X Business' : 'Core4X Pro'} kaufen</h3>
           </div>
           <button type="button" onClick={onClose} disabled={loading} className="text-2xl font-black text-black/35 disabled:opacity-30">×</button>
         </div>
@@ -440,12 +441,12 @@ const Preise: React.FC = () => {
         <PreisCard
           eyebrow="Business"
           title="Für größere Strukturen"
-          price="Coming soon"
-          cadence="Preis und Start werden bekanntgegeben"
+          price="59 €"
+          cadence="pro Monat"
           description="Für Organisationen mit erweiterten Anforderungen, mehreren Bereichen oder zusätzlicher Betreuung."
           features={['Alle Pro-Funktionen', 'Erweiterte Rechte & Strukturen', 'Mehrere Organisationsbereiche', 'Erweiterte Auswertungen', 'Priorisierte Betreuung']}
-          badge="Coming soon"
-          action={<button disabled className="w-full py-4 rounded-xl bg-[#EAE6DA] text-black/40 text-sm font-black uppercase tracking-wide cursor-not-allowed">Noch nicht verfügbar</button>}
+          badge="Monatlich kündbar"
+          action={<CheckoutButton plan="business" light onCheckout={setCheckoutPlan}>Business kaufen</CheckoutButton>}
         />
       </div>
 
@@ -463,7 +464,7 @@ const Preise: React.FC = () => {
           </div>
           <div className="lg:text-right">
             <div className="text-[11px] font-black uppercase tracking-[0.18em] text-[#D6C28B]">Einmaliger Event-Tarif</div>
-            <div className="text-4xl font-black tracking-[-0.04em] mt-2">Preis folgt</div>
+            <div className="text-4xl font-black tracking-[-0.04em] mt-2">60 €</div>
             <div className="text-xs text-white/40 font-bold mt-1">keine Jahresbindung</div>
             <div className="mt-5 max-w-sm lg:ml-auto"><CheckoutButton plan="event48" light onCheckout={setCheckoutPlan}>48h Pass kaufen</CheckoutButton></div>
           </div>
@@ -547,8 +548,8 @@ const Zukunft: React.FC = () => (
 const faqItems = [
   ['Kann ich kostenlos starten?', 'Ja. Basic ist für den Einstieg vorgesehen und kann ohne Jahreslizenz genutzt werden.'],
   ['Was kostet Core4X Pro?', 'Der Einführungspreis beträgt 129 € pro Jahr statt regulär 180 €. Das entspricht einem Startvorteil von 51 €.'],
-  ['Wann ist Business verfügbar?', 'Business ist als erweiterter Tarif vorgesehen und aktuell noch nicht verfügbar. Preis und Start werden rechtzeitig bekanntgegeben.'],
-  ['Was ist der 48h Event Pass?', 'Eine zeitlich begrenzte Freischaltung für einzelne Veranstaltungen. Sie ist insbesondere für das Boniersystem und Eventfunktionen ohne Jahresbindung gedacht.'],
+  ['Was kostet Business?', 'Business kostet 59 € pro Monat und richtet sich an größere Organisationen mit erweiterten Strukturen.'],
+  ['Was ist der 48h Event Pass?', 'Der 48h Event Pass kostet einmalig 60 € und schaltet die Eventfunktionen für 48 Stunden frei.'],
   ['Welche Zahlungsarten gibt es?', 'Der Checkout wird über Stripe abgewickelt. Je nach Land und Verfügbarkeit können unter anderem Karten, Apple Pay, Google Pay, PayPal, EPS und SEPA angeboten werden.'],
 ]
 
