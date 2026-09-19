@@ -571,7 +571,7 @@ const App: React.FC = () => {
       {showImpressum && (
         <Modal title="Impressum" onClose={() => setShowImpressum(false)}>
           <p className="font-bold">Medieninhaber und Betreiber</p>
-          <p>Rainer Schmidt<br />Friedrich-Schmolka-Straße 12<br />2542 Kottingbrunn<br />Österreich</p>
+          <p>Natascha Schmidt<br />Friedrich-Schmolka-Straße 12<br />2542 Kottingbrunn<br />Österreich</p>
           <p>E-Mail: office@core4xapp.com</p>
           <p>Entwicklung, Bereitstellung und Betrieb der Softwareplattform Core4X für Vereins-, Community-, Projekt-, Kommunikations-, Verwaltungs- und POS-Funktionen.</p>
           <p><a href={`${APP_LEGAL_BASE}/imprint.html`} target="_blank" rel="noreferrer" className="font-bold underline">Vollständiges Impressum öffnen</a></p>
