@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 
 const APP_BASE = 'https://app.core4xapp.com'
 const APP_LEGAL_BASE = 'https://app.core4xapp.com'
+const API_BASE = 'https://api.core4xapp.com/wp-json/core4x/v1'
 const BRAND_ICON = `${APP_BASE}/icon-512.png`
 
 const STRIPE_LINKS = {
@@ -161,22 +162,178 @@ const Features: React.FC = () => (
   </section>
 )
 
-const CheckoutButton: React.FC<{ plan: StripePlan; children: React.ReactNode; light?: boolean }> = ({ plan, children, light }) => {
-  const checkout = () => {
-    const url = STRIPE_LINKS[plan]
-    if (url) window.location.href = url
-  }
+type BillingCountry = 'AT' | 'DE'
+type CustomerType = 'association' | 'business' | 'private'
 
+const CheckoutButton: React.FC<{ plan: StripePlan; children: React.ReactNode; light?: boolean; onCheckout: (plan: StripePlan) => void }> = ({ plan, children, light, onCheckout }) => {
   const disabled = !STRIPE_LINKS[plan]
 
   return (
     <button
-      onClick={checkout}
+      onClick={() => onCheckout(plan)}
       disabled={disabled}
       className={`w-full py-4 rounded-xl text-sm font-black uppercase tracking-wide transition-transform ${disabled ? 'cursor-not-allowed opacity-45' : 'hover:-translate-y-0.5'} ${light ? 'bg-white text-black' : 'bg-[#1A1A1A] text-white'}`}
     >
       {children}
     </button>
+  )
+}
+
+const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ plan, onClose }) => {
+  const [form, setForm] = useState({
+    customer_type: 'association' as CustomerType,
+    organization_name: '',
+    contact_first_name: '',
+    contact_last_name: '',
+    email: '',
+    phone: '',
+    address_line1: '',
+    postal_code: '',
+    city: '',
+    country_code: 'AT' as BillingCountry,
+    vat_id: '',
+    billing_data_confirmed: false,
+  })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const setField = (field: keyof typeof form, value: string | boolean) => {
+    setForm((current) => ({ ...current, [field]: value }))
+  }
+
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    setError('')
+
+    if (!form.billing_data_confirmed) {
+      setError('Bitte bestätige die Rechnungsdaten.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch(`${API_BASE}/billing/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...form,
+          product_key: plan,
+          billing_cycle: plan === 'event48' ? 'one_time' : 'yearly',
+        }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok || !data?.success) {
+        throw new Error(data?.message || 'Die Bestellung konnte nicht vorbereitet werden.')
+      }
+
+      const stripeUrl = STRIPE_LINKS[plan]
+      if (!stripeUrl) throw new Error('Der Zahlungslink ist noch nicht eingerichtet.')
+
+      const target = new URL(stripeUrl)
+      target.searchParams.set('prefilled_email', form.email)
+      target.searchParams.set('client_reference_id', data.order_key)
+      window.location.href = target.toString()
+    } catch (err: any) {
+      setError(err?.message || 'Die Bestellung konnte nicht vorbereitet werden.')
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center px-3 py-3">
+      <div className="absolute inset-0 bg-black/65 backdrop-blur-sm" onClick={loading ? undefined : onClose} />
+      <div className="relative z-10 w-full max-w-2xl max-h-[94vh] overflow-y-auto rounded-[1.75rem] bg-white shadow-2xl">
+        <div className="sticky top-0 bg-white/95 backdrop-blur border-b border-black/5 px-5 md:px-7 py-5 flex items-center justify-between">
+          <div>
+            <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#9A8A60]">Rechnungsdaten</div>
+            <h3 className="text-xl font-black mt-1">{plan === 'event48' ? '48h Event Pass' : 'Core4X Pro'} kaufen</h3>
+          </div>
+          <button type="button" onClick={onClose} disabled={loading} className="text-2xl font-black text-black/35 disabled:opacity-30">×</button>
+        </div>
+
+        <form onSubmit={submit} className="p-5 md:p-7 space-y-5">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <label className="text-sm font-bold">Kundentyp
+              <select value={form.customer_type} onChange={(e) => setField('customer_type', e.target.value)} className="mt-2 w-full rounded-xl border border-black/10 px-3 py-3 bg-white">
+                <option value="association">Verein</option>
+                <option value="business">Unternehmen</option>
+                <option value="private">Privatperson</option>
+              </select>
+            </label>
+            <label className="text-sm font-bold">Land
+              <select value={form.country_code} onChange={(e) => setField('country_code', e.target.value)} className="mt-2 w-full rounded-xl border border-black/10 px-3 py-3 bg-white">
+                <option value="AT">Österreich</option>
+                <option value="DE">Deutschland</option>
+              </select>
+            </label>
+          </div>
+
+          <label className="block text-sm font-bold">{form.customer_type === 'association' ? 'Vereinsname' : form.customer_type === 'business' ? 'Firmenname' : 'Name für die Rechnung'}
+            <input required value={form.organization_name} onChange={(e) => setField('organization_name', e.target.value)} className="mt-2 w-full rounded-xl border border-black/10 px-4 py-3" />
+          </label>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <label className="text-sm font-bold">Vorname Ansprechpartner
+              <input required value={form.contact_first_name} onChange={(e) => setField('contact_first_name', e.target.value)} className="mt-2 w-full rounded-xl border border-black/10 px-4 py-3" />
+            </label>
+            <label className="text-sm font-bold">Nachname Ansprechpartner
+              <input required value={form.contact_last_name} onChange={(e) => setField('contact_last_name', e.target.value)} className="mt-2 w-full rounded-xl border border-black/10 px-4 py-3" />
+            </label>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <label className="text-sm font-bold">E-Mail
+              <input required type="email" value={form.email} onChange={(e) => setField('email', e.target.value)} className="mt-2 w-full rounded-xl border border-black/10 px-4 py-3" />
+            </label>
+            <label className="text-sm font-bold">Telefon <span className="font-medium text-black/35">(optional)</span>
+              <input value={form.phone} onChange={(e) => setField('phone', e.target.value)} className="mt-2 w-full rounded-xl border border-black/10 px-4 py-3" />
+            </label>
+          </div>
+
+          <label className="block text-sm font-bold">Rechnungsadresse
+            <input required value={form.address_line1} onChange={(e) => setField('address_line1', e.target.value)} placeholder="Straße und Hausnummer" className="mt-2 w-full rounded-xl border border-black/10 px-4 py-3" />
+          </label>
+
+          <div className="grid grid-cols-[.7fr_1.3fr] gap-4">
+            <label className="text-sm font-bold">PLZ
+              <input required value={form.postal_code} onChange={(e) => setField('postal_code', e.target.value)} className="mt-2 w-full rounded-xl border border-black/10 px-4 py-3" />
+            </label>
+            <label className="text-sm font-bold">Ort
+              <input required value={form.city} onChange={(e) => setField('city', e.target.value)} className="mt-2 w-full rounded-xl border border-black/10 px-4 py-3" />
+            </label>
+          </div>
+
+          <label className="block text-sm font-bold">UID / USt-IdNr. <span className="font-medium text-black/35">(falls vorhanden)</span>
+            <input value={form.vat_id} onChange={(e) => setField('vat_id', e.target.value.toUpperCase())} placeholder={form.country_code === 'DE' ? 'DE123456789' : 'ATU12345678'} className="mt-2 w-full rounded-xl border border-black/10 px-4 py-3 uppercase" />
+          </label>
+
+          <div className={`rounded-2xl p-4 text-sm leading-relaxed ${form.country_code === 'DE' ? 'bg-amber-50 border border-amber-200 text-amber-950' : 'bg-emerald-50 border border-emerald-200 text-emerald-950'}`}>
+            {form.country_code === 'DE'
+              ? 'Deutschland: Nach erfolgreicher Zahlung erhältst du zuerst eine Zahlungsbestätigung. Die Rechnung wird vor dem Versand manuell geprüft.'
+              : 'Österreich: Nach erfolgreicher Zahlung wird die Rechnung automatisch erstellt und an die angegebene E-Mail-Adresse gesendet.'}
+          </div>
+
+          <div className="rounded-2xl bg-[#F7F3E8] border border-black/5 p-4 text-sm leading-relaxed">
+            <div className="font-black mb-1">Rechnungssteller</div>
+            <div>Natascha Schmidt</div>
+            <div>Friedrich-Schmolka-Straße 12</div>
+            <div>2542 Kottingbrunn · Österreich</div>
+          </div>
+
+          <label className="flex gap-3 items-start text-sm font-semibold">
+            <input type="checkbox" checked={form.billing_data_confirmed} onChange={(e) => setField('billing_data_confirmed', e.target.checked)} className="mt-1" />
+            <span>Ich bestätige, dass die angegebenen Rechnungsdaten korrekt und vollständig sind.</span>
+          </label>
+
+          {error && <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm font-semibold text-red-700">{error}</div>}
+
+          <button type="submit" disabled={loading} className="w-full rounded-xl bg-[#111318] text-white py-4 text-sm font-black uppercase tracking-wide disabled:opacity-50">
+            {loading ? 'Bestellung wird vorbereitet…' : 'Weiter zur sicheren Zahlung'}
+          </button>
+          <p className="text-[11px] text-black/40 text-center">Die Zahlung wird anschließend über Stripe abgewickelt.</p>
+        </form>
+      </div>
+    </div>
   )
 }
 
@@ -212,7 +369,10 @@ const PreisCard: React.FC<{
   </div>
 )
 
-const Preise: React.FC = () => (
+const Preise: React.FC = () => {
+  const [checkoutPlan, setCheckoutPlan] = useState<StripePlan | null>(null)
+
+  return (
   <section id="preise" className="py-24 px-5 bg-[#F7F3E8]">
     <div className="max-w-7xl mx-auto">
       <div className="text-center max-w-3xl mx-auto mb-12">
@@ -241,7 +401,7 @@ const Preise: React.FC = () => (
           features={['Alle Basic-Funktionen', 'Mitglieder & Rollen', 'Kernteam & Einkauf', 'Rechnungen & Belege', 'Boniersystem / POS', 'Auswertungen & Archiv']}
           featured
           badge="51 € Startvorteil"
-          action={<CheckoutButton plan="pro" light>Pro kaufen</CheckoutButton>}
+          action={<CheckoutButton plan="pro" light onCheckout={setCheckoutPlan}>Pro kaufen</CheckoutButton>}
         />
 
         <PreisCard
@@ -272,7 +432,7 @@ const Preise: React.FC = () => (
             <div className="text-[11px] font-black uppercase tracking-[0.18em] text-[#D6C28B]">Einmaliger Event-Tarif</div>
             <div className="text-4xl font-black tracking-[-0.04em] mt-2">Preis folgt</div>
             <div className="text-xs text-white/40 font-bold mt-1">keine Jahresbindung</div>
-            <div className="mt-5 max-w-sm lg:ml-auto"><CheckoutButton plan="event48" light>48h Pass kaufen</CheckoutButton></div>
+            <div className="mt-5 max-w-sm lg:ml-auto"><CheckoutButton plan="event48" light onCheckout={setCheckoutPlan}>48h Pass kaufen</CheckoutButton></div>
           </div>
         </div>
       </div>
@@ -287,8 +447,10 @@ const Preise: React.FC = () => (
         </div>
       </div>
     </div>
+    {checkoutPlan && <PurchaseModal plan={checkoutPlan} onClose={() => setCheckoutPlan(null)} />}
   </section>
-)
+  )
+}
 
 const comparisonRows = [
   ['Projekte, Kalender, Aufgaben', '✓', '✓', '✓'],
