@@ -514,8 +514,8 @@ const Preise: React.FC = () => {
           cadence="pro Monat"
           description="Für Organisationen mit erweiterten Anforderungen, mehreren Bereichen oder zusätzlicher Betreuung."
           features={['Alle Pro-Funktionen', 'Erweiterte Rechte & Strukturen', 'Mehrere Organisationsbereiche', 'Erweiterte Auswertungen', 'Priorisierte Betreuung']}
-          badge="Monatlich kündbar"
-          action={<CheckoutButton plan="business" light onCheckout={setCheckoutPlan}>Business kaufen</CheckoutButton>}
+          badge="Coming soon"
+          action={<div className="w-full py-4 rounded-xl bg-[#F0ECE1] text-black/45 text-sm font-black uppercase tracking-wide text-center cursor-not-allowed">Coming soon</div>}
         />
       </div>
 
