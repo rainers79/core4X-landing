@@ -47,8 +47,8 @@ const Nav: React.FC = () => {
         </button>
 
         <div className="hidden md:flex items-center gap-7">
-          <button onClick={() => go('features')} className="text-sm font-bold text-black/55 hover:text-black">Funktionen</button>
           <button onClick={() => go('preise')} className="text-sm font-bold text-black/55 hover:text-black">Tarife</button>
+          <button onClick={() => go('features')} className="text-sm font-bold text-black/55 hover:text-black">Funktionen</button>
           <button onClick={() => go('vergleich')} className="text-sm font-bold text-black/55 hover:text-black">Vergleich</button>
           <button onClick={() => go('faq')} className="text-sm font-bold text-black/55 hover:text-black">FAQ</button>
         </div>
@@ -67,8 +67,8 @@ const Nav: React.FC = () => {
 
       {menuOpen && (
         <div className="md:hidden bg-[#F7F3E8] border-t border-black/5 px-5 py-5 space-y-4 shadow-lg">
-          <button onClick={() => go('features')} className="block text-sm font-bold">Funktionen</button>
           <button onClick={() => go('preise')} className="block text-sm font-bold">Tarife</button>
+          <button onClick={() => go('features')} className="block text-sm font-bold">Funktionen</button>
           <button onClick={() => go('vergleich')} className="block text-sm font-bold">Vergleich</button>
           <button onClick={() => go('faq')} className="block text-sm font-bold">FAQ</button>
           <a href={APP_BASE} className="block text-sm font-bold">App öffnen</a>
@@ -649,8 +649,8 @@ const App: React.FC = () => {
     <div className="min-h-screen overflow-x-hidden">
       <Nav />
       <Hero />
-      <Features />
       <Preise />
+      <Features />
       <Vergleich />
       <Zukunft />
       <FAQ />
