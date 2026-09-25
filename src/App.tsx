@@ -4,6 +4,8 @@ const APP_BASE = 'https://app.core4xapp.com'
 const APP_LEGAL_BASE = 'https://app.core4xapp.com'
 const API_BASE = 'https://api.core4xapp.com/wp-json/core4x/v1'
 const BRAND_ICON = `${APP_BASE}/icon-512.png`
+const LATEST_DOWNLOAD_URL = import.meta.env.VITE_LATEST_DOWNLOAD_URL || 'https://play.google.com/store/apps/details?id=at.core4x.app'
+const LATEST_VERSION = import.meta.env.VITE_LATEST_VERSION || 'Neueste Version'
 
 const STRIPE_LINKS = {
   pro: import.meta.env.VITE_STRIPE_PRO_URL || '',
@@ -49,6 +51,7 @@ const Nav: React.FC = () => {
         <div className="hidden md:flex items-center gap-7">
           <button onClick={() => go('preise')} className="text-sm font-bold text-black/55 hover:text-black">Tarife</button>
           <button onClick={() => go('features')} className="text-sm font-bold text-black/55 hover:text-black">Funktionen</button>
+          <button onClick={() => go('download')} className="text-sm font-bold text-black/55 hover:text-black">Download</button>
           <button onClick={() => go('vergleich')} className="text-sm font-bold text-black/55 hover:text-black">Vergleich</button>
           <button onClick={() => go('faq')} className="text-sm font-bold text-black/55 hover:text-black">FAQ</button>
         </div>
@@ -69,6 +72,7 @@ const Nav: React.FC = () => {
         <div className="md:hidden bg-[#F7F3E8] border-t border-black/5 px-5 py-5 space-y-4 shadow-lg">
           <button onClick={() => go('preise')} className="block text-sm font-bold">Tarife</button>
           <button onClick={() => go('features')} className="block text-sm font-bold">Funktionen</button>
+          <button onClick={() => go('download')} className="block text-sm font-bold">Download</button>
           <button onClick={() => go('vergleich')} className="block text-sm font-bold">Vergleich</button>
           <button onClick={() => go('faq')} className="block text-sm font-bold">FAQ</button>
           <a href={APP_BASE} className="block text-sm font-bold">App öffnen</a>
@@ -97,6 +101,7 @@ const Hero: React.FC = () => (
         <div className="mt-8 flex flex-col sm:flex-row gap-3">
           <button onClick={() => scrollToSection('preise')} className="px-7 py-4 rounded-2xl bg-[#1A1A1A] text-white text-sm font-black uppercase tracking-wide shadow-xl">Tarife ansehen</button>
           <button onClick={() => scrollToSection('features')} className="px-7 py-4 rounded-2xl bg-white border border-black/5 text-black text-sm font-black uppercase tracking-wide">Funktionen entdecken</button>
+          <button onClick={() => scrollToSection('download')} className="px-7 py-4 rounded-2xl bg-[#B5A47A] text-black text-sm font-black uppercase tracking-wide">Update laden</button>
         </div>
         <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-xs font-bold text-black/45">
           <span>✓ Basic kostenlos</span>
@@ -124,6 +129,48 @@ const Hero: React.FC = () => (
               </div>
             ))}
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+)
+
+
+const DownloadUpdate: React.FC = () => (
+  <section id="download" className="py-16 px-5 bg-[#111318] text-white">
+    <div className="max-w-7xl mx-auto">
+      <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 md:p-9 grid lg:grid-cols-[1fr_auto] gap-8 items-center shadow-2xl">
+        <div className="flex items-start gap-5">
+          <img src={BRAND_ICON} alt="Core4X" className="w-16 h-16 md:w-20 md:h-20 rounded-2xl object-contain shrink-0" />
+          <div>
+            <div className="text-[11px] font-black uppercase tracking-[0.18em] text-[#D6C28B] mb-2">Download & Update</div>
+            <h2 className="text-2xl md:text-4xl font-black tracking-[-0.035em]">Immer die aktuelle Core4X-Version.</h2>
+            <p className="mt-3 max-w-2xl text-sm md:text-base text-white/55 leading-relaxed">
+              Hier kannst du die neueste verfügbare Version von Core4X herunterladen bzw. deine bestehende Installation aktualisieren.
+            </p>
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/[0.06] border border-white/10 px-3 py-2 text-xs font-bold text-white/65">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              {LATEST_VERSION}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row lg:flex-col gap-3 min-w-[240px]">
+          <a
+            href={LATEST_DOWNLOAD_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#D6C28B] px-6 py-4 text-sm font-black uppercase tracking-wide text-black hover:-translate-y-0.5 transition-transform"
+          >
+            <span aria-hidden="true">↓</span>
+            Neueste Version herunterladen
+          </a>
+          <a
+            href={APP_BASE}
+            className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] px-6 py-4 text-sm font-black uppercase tracking-wide text-white/80 hover:bg-white/[0.1]"
+          >
+            App im Browser öffnen
+          </a>
         </div>
       </div>
     </div>
@@ -649,6 +696,7 @@ const App: React.FC = () => {
     <div className="min-h-screen overflow-x-hidden">
       <Nav />
       <Hero />
+      <DownloadUpdate />
       <Preise />
       <Features />
       <Vergleich />
