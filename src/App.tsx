@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 const APP_BASE = 'https://app.core4xapp.com'
 const APP_LEGAL_BASE = 'https://app.core4xapp.com'
 const API_BASE = 'https://api.core4xapp.com/wp-json/core4x/v1'
+const LATEST_DOWNLOAD_URL = import.meta.env.VITE_LATEST_DOWNLOAD_URL || 'https://play.google.com/store/apps/details?id=at.core4x.app'
 const BRAND_ICON = `${APP_BASE}/icon-512.png`
 const LATEST_DOWNLOAD_URL = import.meta.env.VITE_LATEST_DOWNLOAD_URL || 'https://play.google.com/store/apps/details?id=at.core4x.app'
 const LATEST_VERSION = import.meta.env.VITE_LATEST_VERSION || 'Neueste Version'
@@ -188,6 +189,35 @@ const features = [
   ['Boniersystem / POS', 'Artikel, Tische, Zahlungen, Tagesumsatz und Veranstaltungsbetrieb abwickeln.'],
   ['Archiv & Auswertungen', 'Abgeschlossene Vorgänge nachvollziehbar aufbewahren und auswerten.'],
 ]
+
+const DownloadUpdate: React.FC = () => (
+  <section id="download" className="py-16 px-5 bg-[#111318] text-white">
+    <div className="max-w-7xl mx-auto">
+      <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6 md:p-8 flex flex-col lg:flex-row gap-6 lg:items-center lg:justify-between">
+        <div className="max-w-3xl">
+          <div className="text-[11px] font-black uppercase tracking-[0.18em] text-[#D6C28B] mb-3">Neueste Core4X-Version</div>
+          <h2 className="text-2xl md:text-4xl font-black tracking-[-0.035em]">Immer mit dem aktuellen Update arbeiten.</h2>
+          <p className="mt-3 text-sm md:text-base text-white/60 leading-relaxed">
+            Hier kannst du jederzeit die aktuell freigegebene Core4X-Version öffnen bzw. herunterladen. Der Link wird zentral gepflegt und kann bei neuen Releases ohne Umbau der Landingpage aktualisiert werden.
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row lg:flex-col gap-3 min-w-[240px]">
+          <a
+            href={LATEST_DOWNLOAD_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="px-6 py-4 rounded-2xl bg-[#D6C28B] text-black text-sm font-black uppercase tracking-wide text-center shadow-xl hover:-translate-y-0.5 transition-transform"
+          >
+            Neueste Version downloaden
+          </a>
+          <a href={APP_BASE} className="px-6 py-3.5 rounded-2xl border border-white/15 text-white text-sm font-black text-center">
+            Web-App öffnen
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+)
 
 const Features: React.FC = () => (
   <section id="features" className="py-24 px-5 bg-white">
