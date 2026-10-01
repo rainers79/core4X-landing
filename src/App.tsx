@@ -215,13 +215,12 @@ const Products: React.FC<{ onPrivacy: (product: ProductKey) => void }> = ({ onPr
           <h3 className="mt-5 text-2xl font-black tracking-tight">{productData.partyplaner.name}</h3>
           <p className="mt-2 text-sm font-bold text-[#9A8A60]">{productData.partyplaner.subtitle}</p>
           <p className="mt-4 text-sm text-black/55 leading-relaxed">{productData.partyplaner.description}</p>
-          <button
-            type="button"
-            onClick={() => onPrivacy('partyplaner')}
+          <a
+            href="/privacy/partyplaner/"
             className="mt-6 inline-flex items-center justify-center rounded-xl bg-[#111318] px-5 py-3 text-xs font-black uppercase tracking-wide text-white"
           >
             Datenschutzerklärung
-          </button>
+          </a>
         </article>
 
         <article className="rounded-[1.75rem] border border-dashed border-black/15 p-6 md:p-7 flex flex-col justify-center min-h-64">
