@@ -52,6 +52,7 @@ const Nav: React.FC = () => {
           <button onClick={() => go('preise')} className="text-sm font-bold text-black/55 hover:text-black">Tarife</button>
           <button onClick={() => go('features')} className="text-sm font-bold text-black/55 hover:text-black">Funktionen</button>
           <button onClick={() => go('download')} className="text-sm font-bold text-black/55 hover:text-black">Download</button>
+          <button onClick={() => go('products')} className="text-sm font-bold text-black/55 hover:text-black">Weitere Produkte</button>
           <button onClick={() => go('vergleich')} className="text-sm font-bold text-black/55 hover:text-black">Vergleich</button>
           <button onClick={() => go('faq')} className="text-sm font-bold text-black/55 hover:text-black">FAQ</button>
         </div>
@@ -73,6 +74,7 @@ const Nav: React.FC = () => {
           <button onClick={() => go('preise')} className="block text-sm font-bold">Tarife</button>
           <button onClick={() => go('features')} className="block text-sm font-bold">Funktionen</button>
           <button onClick={() => go('download')} className="block text-sm font-bold">Download</button>
+          <button onClick={() => go('products')} className="block text-sm font-bold">Weitere Produkte</button>
           <button onClick={() => go('vergleich')} className="block text-sm font-bold">Vergleich</button>
           <button onClick={() => go('faq')} className="block text-sm font-bold">FAQ</button>
           <a href={APP_BASE} className="block text-sm font-bold">App öffnen</a>
@@ -172,6 +174,61 @@ const DownloadUpdate: React.FC = () => (
             App im Browser öffnen
           </a>
         </div>
+      </div>
+    </div>
+  </section>
+)
+
+
+type ProductKey = 'partyplaner'
+
+const productData: Record<ProductKey, {
+  name: string
+  subtitle: string
+  description: string
+  status: string
+}> = {
+  partyplaner: {
+    name: 'Partyplaner by Core4X',
+    subtitle: 'Mengenplanung für Feiern & Veranstaltungen',
+    description: 'Plane Getränke, Speisen und Portionen anhand von Gästezahl, Dauer und Veranstaltungsart. Die Berechnung läuft ohne Benutzerkonto und ist als einfache Planungshilfe gedacht.',
+    status: 'Android-App · Testphase',
+  },
+}
+
+const Products: React.FC<{ onPrivacy: (product: ProductKey) => void }> = ({ onPrivacy }) => (
+  <section id="products" className="py-24 px-5 bg-[#F7F3E8]">
+    <div className="max-w-7xl mx-auto">
+      <div className="max-w-3xl mb-12">
+        <div className="text-xs font-black uppercase tracking-[0.18em] text-[#9A8A60] mb-3">Weitere Produkte</div>
+        <h2 className="text-3xl md:text-5xl font-black tracking-[-0.04em]">Praktische Tools aus dem Core4X-Umfeld.</h2>
+        <p className="mt-5 text-black/50 font-medium leading-relaxed">
+          Hier findest du eigenständige Apps und Werkzeuge von Core4X. Für jedes Produkt stellen wir die jeweils passende Datenschutzerklärung separat bereit.
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <article className="rounded-[1.75rem] bg-white border border-black/5 p-6 md:p-7 shadow-sm">
+          <div className="inline-flex rounded-full bg-[#F0ECE1] px-3 py-1 text-[10px] font-black uppercase tracking-wide text-black/55">
+            {productData.partyplaner.status}
+          </div>
+          <h3 className="mt-5 text-2xl font-black tracking-tight">{productData.partyplaner.name}</h3>
+          <p className="mt-2 text-sm font-bold text-[#9A8A60]">{productData.partyplaner.subtitle}</p>
+          <p className="mt-4 text-sm text-black/55 leading-relaxed">{productData.partyplaner.description}</p>
+          <button
+            type="button"
+            onClick={() => onPrivacy('partyplaner')}
+            className="mt-6 inline-flex items-center justify-center rounded-xl bg-[#111318] px-5 py-3 text-xs font-black uppercase tracking-wide text-white"
+          >
+            Datenschutzerklärung
+          </button>
+        </article>
+
+        <article className="rounded-[1.75rem] border border-dashed border-black/15 p-6 md:p-7 flex flex-col justify-center min-h-64">
+          <div className="text-[11px] font-black uppercase tracking-[0.18em] text-black/35">In Vorbereitung</div>
+          <h3 className="mt-3 text-xl font-black">Weitere Core4X Tools folgen.</h3>
+          <p className="mt-3 text-sm text-black/45 leading-relaxed">Neue eigenständige Apps werden hier ergänzt – jeweils mit Produktinformation und eigener Datenschutzerklärung.</p>
+        </article>
       </div>
     </div>
   </section>
@@ -691,12 +748,14 @@ const FAQ: React.FC = () => (
 const App: React.FC = () => {
   const [showImpressum, setShowImpressum] = useState(false)
   const [showDatenschutz, setShowDatenschutz] = useState(false)
+  const [productPrivacy, setProductPrivacy] = useState<ProductKey | null>(null)
 
   return (
     <div className="min-h-screen overflow-x-hidden">
       <Nav />
       <Hero />
       <DownloadUpdate />
+      <Products onPrivacy={setProductPrivacy} />
       <Preise />
       <Features />
       <Vergleich />
@@ -712,6 +771,7 @@ const App: React.FC = () => {
           <div className="text-xs text-black/35 font-medium">{new Date().getFullYear()} Core4X. Alle Rechte vorbehalten.</div>
           <div className="flex flex-wrap justify-center gap-5">
             <button onClick={() => setShowImpressum(true)} className="text-xs font-semibold text-black/45 hover:text-black">Impressum</button>
+            <button onClick={() => scrollToSection('products')} className="text-xs font-semibold text-black/45 hover:text-black">Weitere Produkte</button>
             <button onClick={() => setShowDatenschutz(true)} className="text-xs font-semibold text-black/45 hover:text-black">Datenschutz</button>
             <a href={`${APP_LEGAL_BASE}/terms.html`} target="_blank" rel="noreferrer" className="text-xs font-semibold text-black/45 hover:text-black">Nutzungsbedingungen</a>
             <a href="/account-deletion.html" className="text-xs font-semibold text-black/45 hover:text-black">Konto löschen</a>
@@ -733,6 +793,22 @@ const App: React.FC = () => {
         <Modal title="Datenschutzerklärung" onClose={() => setShowDatenschutz(false)}>
           <p>Die vollständigen Informationen zu Zwecken, Rechtsgrundlagen, Empfängern, Speicherfristen und Betroffenenrechten findest du in der aktuellen Core4X-Datenschutzerklärung.</p>
           <p><a href={`${APP_LEGAL_BASE}/privacy.html`} target="_blank" rel="noreferrer" className="font-bold underline">Vollständige Datenschutzerklärung öffnen</a></p>
+        </Modal>
+      )}
+
+      {productPrivacy === 'partyplaner' && (
+        <Modal title="Datenschutz – Partyplaner by Core4X" onClose={() => setProductPrivacy(null)}>
+          <p className="font-bold">Stand: 1. Oktober 2026</p>
+          <p>Partyplaner by Core4X ist eine eigenständige Planungshilfe für Feiern und Veranstaltungen.</p>
+          <p className="font-bold">Welche Daten verarbeitet die App?</p>
+          <p>Die App benötigt kein Benutzerkonto. Eingaben wie Gästezahl, Veranstaltungsdauer, ausgewählte Getränke, Speisen und eigene Artikel werden für die Berechnung innerhalb der App verwendet und nicht an einen Core4X-Server übertragen.</p>
+          <p className="font-bold">Keine Weitergabe von Planungsdaten</p>
+          <p>Die im Partyplaner eingegebenen Planungsdaten werden von Core4X nicht verkauft und nicht zu Werbezwecken an Dritte weitergegeben.</p>
+          <p className="font-bold">Externe Dienste und Links</p>
+          <p>Wenn du aus dem Partyplaner einen externen Link öffnest, zum Beispiel zur Core4X-Webseite oder zu Google Play, gelten für den aufgerufenen Dienst dessen eigene Datenschutzbestimmungen. Google kann im Rahmen von Play Store, Installation und Gerätebetrieb eigene technische Daten verarbeiten.</p>
+          <p className="font-bold">Verantwortlicher und Kontakt</p>
+          <p>Natascha Schmidt<br />Friedrich-Schmolka-Straße 12<br />2542 Kottingbrunn · Österreich<br />E-Mail: office@core4xapp.com</p>
+          <p>Bei späteren Versionen mit zusätzlichen Online-Funktionen wird diese Datenschutzerklärung entsprechend aktualisiert.</p>
         </Modal>
       )}
     </div>
