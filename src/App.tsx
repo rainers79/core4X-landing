@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 
+const BANK_TRANSFER_TEST_MODE = new URLSearchParams(window.location.search).get('test') === 'bank-transfer'
+
 const APP_BASE = 'https://app.core4xapp.com'
 const APP_LEGAL_BASE = 'https://app.core4xapp.com'
 const API_BASE = 'https://api.core4xapp.com/wp-json/core4x/v1'
@@ -286,14 +288,14 @@ const CheckoutButton: React.FC<{ plan: StripePlan; children: React.ReactNode; li
 const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ plan, onClose }) => {
   const [form, setForm] = useState({
     customer_type: 'association' as CustomerType,
-    organization_name: '',
-    contact_first_name: '',
-    contact_last_name: '',
-    email: '',
+    organization_name: BANK_TRANSFER_TEST_MODE ? 'Core4X Testorganisation' : '',
+    contact_first_name: BANK_TRANSFER_TEST_MODE ? 'Test' : '',
+    contact_last_name: BANK_TRANSFER_TEST_MODE ? 'Kunde' : '',
+    email: BANK_TRANSFER_TEST_MODE ? 'office@core4xapp.com' : '',
     phone: '',
-    address_line1: '',
-    postal_code: '',
-    city: '',
+    address_line1: BANK_TRANSFER_TEST_MODE ? 'Teststraße 1' : '',
+    postal_code: BANK_TRANSFER_TEST_MODE ? '2542' : '',
+    city: BANK_TRANSFER_TEST_MODE ? 'Kottingbrunn' : '',
     country_code: 'AT' as BillingCountry,
     vat_id: '',
     billing_data_confirmed: false,
@@ -307,11 +309,18 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
   const [existingAccount, setExistingAccount] = useState(false)
   const [order, setOrder] = useState<{
     order_key: string
+    test?: boolean
+    test_token?: string
+    payment_status: string
+    paid_until: string
     provisional_until: string
     registration_url: string
     payment_details: { account_holder: string; iban: string; bic: string }
     delivery: { customer_email_sent: boolean; operator_email_sent: boolean }
   } | null>(null)
+
+  const [testMessage, setTestMessage] = useState('')
+  const [testPdf, setTestPdf] = useState('')
 
   const setField = (field: keyof typeof form, value: string | boolean) => {
     setForm((current) => ({ ...current, [field]: value }))
@@ -338,7 +347,7 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
     }
     setLoading(true)
     try {
-      const response = await fetch(`${API_BASE}/billing/bank-transfer/orders`, {
+      const response = await fetch(`${API_BASE}/billing/bank-transfer/${BANK_TRANSFER_TEST_MODE ? 'test-orders' : 'orders'}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, product_key: 'pro', billing_cycle: 'yearly' }),
@@ -356,6 +365,23 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
     }
   }
 
+  const testAction = async (action: string) => {
+    if (!order?.test || loading) return
+    setLoading(true); setError(''); setTestMessage('')
+    try {
+      const response = await fetch(`${API_BASE}/billing/bank-transfer/test-orders/${encodeURIComponent(order.order_key)}/action`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ test_token: order.test_token, action }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok || !data.success) throw new Error(data.message || 'Testaktion fehlgeschlagen.')
+      setOrder(current => current ? { ...current, payment_status: data.payment_status } : current)
+      setTestMessage(data.message)
+      if (data.pdf_url) setTestPdf(data.pdf_url)
+    } catch (err) { setError(err instanceof Error ? err.message : 'Testaktion fehlgeschlagen.') }
+    finally { setLoading(false) }
+  }
+
   return (
     <div className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center px-3 py-3">
       <div className="absolute inset-0 bg-black/65 backdrop-blur-sm" onClick={loading ? undefined : onClose} />
@@ -370,8 +396,8 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
 
         {order ? (
           <div className="p-5 md:p-7 space-y-5" role="status">
-            <h4 className="text-xl font-black">Bestellung gespeichert – Pro sofort nutzen</h4>
-            <p>Überweise <strong>126,00 €</strong> innerhalb von sieben Tagen. Pro ist vorläufig bis {new Date(order.provisional_until.replace(' ', 'T')).toLocaleDateString('de-AT')} freigeschaltet.</p>
+            <h4 className="text-xl font-black">{order.test ? 'TESTBESTELLUNG – nicht überweisen' : 'Bestellung gespeichert – Pro sofort nutzen'}</h4>
+            <p>{order.test ? 'Nur Test: Im Echtbetrieb werden 126,00 € innerhalb von sieben Tagen überwiesen. Keine Kundenlizenz wurde verändert.' : <>Überweise <strong>126,00 €</strong> innerhalb von sieben Tagen. Pro ist vorläufig bis {new Date(order.provisional_until.replace(' ', 'T')).toLocaleDateString('de-AT')} freigeschaltet.</>}</p>
             <dl className="rounded-2xl bg-[#F7F3E8] p-5 space-y-2 break-all">
               <dt className="font-bold">Empfängerin</dt><dd>{order.payment_details.account_holder}</dd>
               <dt className="font-bold">IBAN</dt><dd className="select-all">{order.payment_details.iban}</dd>
@@ -380,11 +406,31 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
               <dt className="font-bold">Verwendungszweck</dt><dd className="select-all">{order.order_key}</dd>
             </dl>
             <p className="text-sm">Die Überweisung führst du selbst in deinem Banking aus. Nach unserer Zahlungsbestätigung läuft Pro ein Jahr ab Bestellung. Ohne Bestätigung erfolgt die Rückstellung auf Basic; deine Daten bleiben erhalten.</p>
-            {!order.delivery.customer_email_sent && <p className="text-amber-800">Die Bestell-E-Mail konnte nicht versendet werden. Bitte sichere die Zahlungsdaten und deinen Registrierungslink. Bei Fragen: office@core4xapp.com.</p>}
-            <a href={order.registration_url || APP_BASE} className="block text-center rounded-xl bg-[#111318] text-white py-4 font-black">{order.registration_url ? 'Jetzt registrieren und starten' : 'Core4X öffnen'}</a>
+            {!order.test && !order.delivery.customer_email_sent && <p className="text-amber-800">Die Bestell-E-Mail konnte nicht versendet werden. Bitte sichere die Zahlungsdaten und deinen Registrierungslink. Bei Fragen: office@core4xapp.com.</p>}
+            {!order.test && <a href={order.registration_url || APP_BASE} className="block text-center rounded-xl bg-[#111318] text-white py-4 font-black">{order.registration_url ? 'Jetzt registrieren und starten' : 'Core4X öffnen'}</a>}
+            {order.test && <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 space-y-3">
+              <p className="font-black">Testablauf – keine echte Freischaltung</p>
+              <p>Status: <strong>{({ awaiting_payment: 'Vorläufiges Pro (simuliert)', paid: 'Jahres-Pro bestätigt (simuliert)', expired: 'Sieben Tage abgelaufen → Basic (simuliert)', canceled: 'Freischaltung beendet → Basic (simuliert)' } as Record<string, string>)[order.payment_status] || order.payment_status}</strong></p>
+              <div className="grid sm:grid-cols-2 gap-2">
+                {[
+                  ['simulate_paid', 'Zahlungseingang simulieren'],
+                  ['simulate_expired', 'Ablauf nach sieben Tagen simulieren'],
+                  ['simulate_canceled', 'Freischaltung beenden simulieren'],
+                  ['reset', 'Test zurücksetzen'],
+                  ['send_test_mail', 'Testmail an office@core4xapp.com'],
+                  ['create_test_invoice', 'Testrechnung als PDF erstellen'],
+                ].map(([action, label]) => <button key={action} type="button" disabled={loading} onClick={() => void testAction(action)} className="rounded-xl bg-white border border-amber-300 p-3 font-bold disabled:opacity-50">{label}</button>)}
+              </div>
+              <p className="text-sm">Registrierung und Kundenlizenzen bleiben unberührt. Testmails gehen ausschließlich an office@core4xapp.com. Das PDF ist ausdrücklich als TEST markiert.</p>
+              {testMessage && <p role="status">{testMessage}</p>}
+              {error && <p role="alert" className="text-red-700">{error}</p>}
+              {testPdf && <a href={testPdf} target="_blank" rel="noreferrer" className="block font-bold underline">Test-PDF öffnen</a>}
+              <a href="https://operator.core4xapp.com/?tab=orders" target="_blank" rel="noreferrer" className="block font-bold underline">Testbestellung im Operator prüfen (Testbestellungen einblenden)</a>
+            </div>}
             <button type="button" onClick={onClose} className="w-full py-3 font-bold">Schließen</button>
           </div>
         ) : <form onSubmit={submit} className="p-5 md:p-7 space-y-5">
+          {BANK_TRANSFER_TEST_MODE && <div role="status" className="rounded-xl border border-amber-300 bg-amber-50 p-4 font-bold">TESTMODUS: keine echte Bestellung, keine Zahlungspflicht. Nicht überweisen. Testdaten sind vorausgefüllt; bitte nur erfundene Daten verwenden.</div>}
           <div className="grid sm:grid-cols-2 gap-4">
             <label className="text-sm font-bold">Kundentyp
               <select value={form.customer_type} onChange={(e) => setField('customer_type', e.target.value)} className="mt-2 w-full rounded-xl border border-black/10 px-3 py-3 bg-white">
@@ -414,10 +460,10 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
             </label>
           </div>
 
-          <label className="flex gap-3 items-start text-sm font-semibold">
+          {!BANK_TRANSFER_TEST_MODE && <label className="flex gap-3 items-start text-sm font-semibold">
             <input type="checkbox" checked={existingAccount} onChange={e => { setExistingAccount(e.target.checked); setField('account_password', ''); setField('organization_id', '') }} />
             Ich habe bereits ein Core4X-Konto und bin Owner dieser Organisation.
-          </label>
+          </label>}
           {existingAccount && <div className="space-y-3 rounded-xl bg-[#F7F3E8] p-4">
             <p className="text-sm">Verwende deine Core4X-E-Mail und den exakten Organisationsnamen. Pro wird direkt für diese Organisation aktiviert.</p>
             <label className="block text-sm font-bold">Core4X-Passwort
@@ -481,10 +527,10 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
 
           <label className="flex gap-3 items-start text-sm font-semibold">
             <input required type="checkbox" checked={form.terms_accepted} onChange={e => setField('terms_accepted', e.target.checked)} className="mt-1" />
-            <span>Ich bestelle Core4X Pro für ein Jahr um 126,00 € und akzeptiere die <a href={`${APP_LEGAL_BASE}/terms.html`} target="_blank" rel="noreferrer" className="underline">AGB</a>. Ich wünsche den sofortigen Beginn der Nutzung. Zahlung innerhalb von sieben Tagen; ohne Zahlungsbestätigung wird auf Basic zurückgestellt.</span>
+            <span>{BANK_TRANSFER_TEST_MODE ? 'Nur Test: Im Echtbetrieb lautet die Bestätigung: ' : ''}Ich bestelle Core4X Pro für ein Jahr um 126,00 € und akzeptiere die <a href={`${APP_LEGAL_BASE}/terms.html`} target="_blank" rel="noreferrer" className="underline">AGB</a>. Ich wünsche den sofortigen Beginn der Nutzung. Zahlung innerhalb von sieben Tagen; ohne Zahlungsbestätigung wird auf Basic zurückgestellt.</span>
           </label>
           <button type="submit" disabled={loading} className="w-full rounded-xl bg-[#111318] text-white py-4 text-sm font-black uppercase tracking-wide disabled:opacity-50">
-            {loading ? 'Bestellung wird gespeichert…' : 'Zahlungspflichtig bestellen – 126 € / Jahr'}
+            {loading ? 'Bestellung wird gespeichert…' : BANK_TRANSFER_TEST_MODE ? 'Testbestellung starten – keine Zahlung' : 'Zahlungspflichtig bestellen – 126 € / Jahr'}
           </button>
           <p className="text-[11px] text-black/40 text-center">Die Überweisung führst du selbst aus. Deine Bestellnummer dient als Verwendungszweck.</p>
         </form>}
@@ -526,7 +572,7 @@ const PreisCard: React.FC<{
 )
 
 const Preise: React.FC = () => {
-  const [checkoutPlan, setCheckoutPlan] = useState<StripePlan | null>(null)
+  const [checkoutPlan, setCheckoutPlan] = useState<StripePlan | null>(BANK_TRANSFER_TEST_MODE ? 'pro' : null)
 
   return (
   <section id="preise" className="py-24 px-5 bg-[#F7F3E8]">
