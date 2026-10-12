@@ -270,7 +270,7 @@ type BillingCountry = 'AT' | 'DE'
 type CustomerType = 'association' | 'business' | 'private'
 
 const CheckoutButton: React.FC<{ plan: StripePlan; children: React.ReactNode; light?: boolean; onCheckout: (plan: StripePlan) => void }> = ({ plan, children, light, onCheckout }) => {
-  const disabled = !STRIPE_LINKS[plan] && !['pro', 'business'].includes(plan)
+  const disabled = plan != 'pro'
 
   return (
     <button
@@ -298,17 +298,19 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
     vat_id: '',
     billing_data_confirmed: false,
     privacy_notice_acknowledged: false,
+    terms_accepted: false,
+    account_password: '',
+    organization_id: '',
   })
   const [loading, setLoading] = useState(false)
-  const [invoiceSending, setInvoiceSending] = useState(false)
   const [error, setError] = useState('')
-  const [testCredentials, setTestCredentials] = useState<{ orderKey: string; testToken: string } | null>(null)
-  const [testResult, setTestResult] = useState<{
-    message: string
-    pdf_url?: string | null
-    payment_email_sent: boolean
-    invoice_email_sent: boolean
-    recipient_email: string
+  const [existingAccount, setExistingAccount] = useState(false)
+  const [order, setOrder] = useState<{
+    order_key: string
+    provisional_until: string
+    registration_url: string
+    payment_details: { account_holder: string; iban: string; bic: string }
+    delivery: { customer_email_sent: boolean; operator_email_sent: boolean }
   } | null>(null)
 
   const setField = (field: keyof typeof form, value: string | boolean) => {
@@ -329,94 +331,35 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
       return
     }
 
+    if (loading || order) return
+    if (!form.terms_accepted) {
+      setError('Bitte bestätige die Bestellbedingungen.')
+      return
+    }
     setLoading(true)
     try {
-      const response = await fetch(`${API_BASE}/billing/orders`, {
+      const response = await fetch(`${API_BASE}/billing/bank-transfer/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...form,
-          product_key: plan,
-          billing_cycle: plan === 'event48' ? 'one_time' : plan === 'business' ? 'monthly' : 'yearly',
-        }),
+        body: JSON.stringify({ ...form, product_key: 'pro', billing_cycle: 'yearly' }),
       })
       const data = await response.json().catch(() => ({}))
       if (!response.ok || !data?.success) {
-        throw new Error(data?.message || 'Die Bestellung konnte nicht vorbereitet werden.')
+        throw new Error(data?.message || 'Die Bestellung konnte nicht gespeichert werden.')
       }
-
-      const stripeUrl = STRIPE_LINKS[plan]
-      if (stripeUrl) {
-        const target = new URL(stripeUrl)
-        target.searchParams.set('prefilled_email', form.email)
-        target.searchParams.set('client_reference_id', data.order_key)
-        window.location.href = target.toString()
-        return
-      }
-
-      if (!['pro', 'business'].includes(plan)) {
-        throw new Error('Für dieses Produkt ist der Testmodus noch nicht verfügbar.')
-      }
-
-      setTestCredentials({ orderKey: data.order_key, testToken: data.test_token })
-
-      const testResponse = await fetch(`${API_BASE}/billing/orders/${encodeURIComponent(data.order_key)}/simulate-test-payment`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ test_token: data.test_token }),
-      })
-      const testData = await testResponse.json().catch(() => ({}))
-      if (!testResponse.ok || !testData?.success) {
-        throw new Error(testData?.message || 'Die Testzahlung konnte nicht simuliert werden.')
-      }
-
-      setTestResult({
-        message: testData.message,
-        pdf_url: testData.pdf_url || null,
-        payment_email_sent: Boolean(testData.payment_email_sent),
-        invoice_email_sent: Boolean(testData.invoice_email_sent),
-        recipient_email: testData.recipient_email || form.email,
-      })
-      setLoading(false)
-    } catch (err: any) {
-      setError(err?.message || 'Die Bestellung konnte nicht vorbereitet werden.')
-      setLoading(false)
-    }
-  }
-
-  const sendReviewedInvoice = async () => {
-    if (!testCredentials || !testResult || invoiceSending) return
-
-    setInvoiceSending(true)
-    setError('')
-    try {
-      const response = await fetch(`${API_BASE}/billing/orders/${encodeURIComponent(testCredentials.orderKey)}/send-test-invoice`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ test_token: testCredentials.testToken }),
-      })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok || !data?.success) {
-        throw new Error(data?.message || 'Die geprüfte Testrechnung konnte nicht versendet werden.')
-      }
-
-      setTestResult((current) => current ? {
-        ...current,
-        message: data.message,
-        invoice_email_sent: true,
-        recipient_email: data.recipient_email || current.recipient_email,
-      } : current)
-    } catch (err: any) {
-      setError(err?.message || 'Die geprüfte Testrechnung konnte nicht versendet werden.')
+      setOrder(data)
+      setField('account_password', '')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Die Bestellung konnte nicht gespeichert werden.')
     } finally {
-      setInvoiceSending(false)
+      setLoading(false)
     }
   }
 
   return (
     <div className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center px-3 py-3">
       <div className="absolute inset-0 bg-black/65 backdrop-blur-sm" onClick={loading ? undefined : onClose} />
-      <div className="relative z-10 w-full max-w-2xl max-h-[94vh] overflow-y-auto rounded-[1.75rem] bg-white shadow-2xl">
+      <div role="dialog" aria-modal="true" aria-label="Core4X Pro bestellen" className="relative z-10 w-full max-w-2xl max-h-[94vh] overflow-y-auto rounded-[1.75rem] bg-white shadow-2xl">
         <div className="sticky top-0 bg-white/95 backdrop-blur border-b border-black/5 px-5 md:px-7 py-5 flex items-center justify-between">
           <div>
             <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#9A8A60]">Rechnungsdaten</div>
@@ -425,7 +368,23 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
           <button type="button" onClick={onClose} disabled={loading} className="text-2xl font-black text-black/35 disabled:opacity-30">×</button>
         </div>
 
-        <form onSubmit={submit} className="p-5 md:p-7 space-y-5">
+        {order ? (
+          <div className="p-5 md:p-7 space-y-5" role="status">
+            <h4 className="text-xl font-black">Bestellung gespeichert – Pro sofort nutzen</h4>
+            <p>Überweise <strong>126,00 €</strong> innerhalb von sieben Tagen. Pro ist vorläufig bis {new Date(order.provisional_until.replace(' ', 'T')).toLocaleDateString('de-AT')} freigeschaltet.</p>
+            <dl className="rounded-2xl bg-[#F7F3E8] p-5 space-y-2 break-all">
+              <dt className="font-bold">Empfängerin</dt><dd>{order.payment_details.account_holder}</dd>
+              <dt className="font-bold">IBAN</dt><dd className="select-all">{order.payment_details.iban}</dd>
+              <dt className="font-bold">BIC</dt><dd className="select-all">{order.payment_details.bic}</dd>
+              <dt className="font-bold">Betrag</dt><dd>126,00 EUR</dd>
+              <dt className="font-bold">Verwendungszweck</dt><dd className="select-all">{order.order_key}</dd>
+            </dl>
+            <p className="text-sm">Die Überweisung führst du selbst in deinem Banking aus. Nach unserer Zahlungsbestätigung läuft Pro ein Jahr ab Bestellung. Ohne Bestätigung erfolgt die Rückstellung auf Basic; deine Daten bleiben erhalten.</p>
+            {!order.delivery.customer_email_sent && <p className="text-amber-800">Die Bestell-E-Mail konnte nicht versendet werden. Bitte sichere die Zahlungsdaten und deinen Registrierungslink. Bei Fragen: office@core4xapp.com.</p>}
+            <a href={order.registration_url || APP_BASE} className="block text-center rounded-xl bg-[#111318] text-white py-4 font-black">{order.registration_url ? 'Jetzt registrieren und starten' : 'Core4X öffnen'}</a>
+            <button type="button" onClick={onClose} className="w-full py-3 font-bold">Schließen</button>
+          </div>
+        ) : <form onSubmit={submit} className="p-5 md:p-7 space-y-5">
           <div className="grid sm:grid-cols-2 gap-4">
             <label className="text-sm font-bold">Kundentyp
               <select value={form.customer_type} onChange={(e) => setField('customer_type', e.target.value)} className="mt-2 w-full rounded-xl border border-black/10 px-3 py-3 bg-white">
@@ -455,6 +414,20 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
             </label>
           </div>
 
+          <label className="flex gap-3 items-start text-sm font-semibold">
+            <input type="checkbox" checked={existingAccount} onChange={e => { setExistingAccount(e.target.checked); setField('account_password', ''); setField('organization_id', '') }} />
+            Ich habe bereits ein Core4X-Konto und bin Owner dieser Organisation.
+          </label>
+          {existingAccount && <div className="space-y-3 rounded-xl bg-[#F7F3E8] p-4">
+            <p className="text-sm">Verwende deine Core4X-E-Mail und den exakten Organisationsnamen. Pro wird direkt für diese Organisation aktiviert.</p>
+            <label className="block text-sm font-bold">Core4X-Passwort
+              <input required type="password" autoComplete="current-password" value={form.account_password} onChange={e => setField('account_password', e.target.value)} className="mt-2 w-full rounded-xl border border-black/10 px-4 py-3" />
+            </label>
+            <label className="block text-sm font-bold">Organisations-ID (nur bei mehreren gleichnamigen Organisationen)
+              <input type="number" min="1" value={form.organization_id} onChange={e => setField('organization_id', e.target.value)} className="mt-2 w-full rounded-xl border border-black/10 px-4 py-3" />
+            </label>
+          </div>}
+
           <div className="grid sm:grid-cols-2 gap-4">
             <label className="text-sm font-bold">E-Mail
               <input required type="email" value={form.email} onChange={(e) => setField('email', e.target.value)} className="mt-2 w-full rounded-xl border border-black/10 px-4 py-3" />
@@ -482,7 +455,7 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
           </label>
 
           <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 text-sm leading-relaxed text-amber-950">
-            Nach erfolgreicher Zahlung erhältst du automatisch eine Zahlungsbestätigung. Die Rechnung wird anschließend manuell geprüft und in einer zweiten E-Mail an die angegebene Adresse versendet.
+            126,00 € pro Jahr statt 180,00 € – 30 % Rabatt aktiv. Zahlung per Überweisung innerhalb von sieben Tagen. Pro wird sofort vorläufig freigeschaltet. Nach manueller Zahlungsbestätigung läuft die Jahreslizenz ab Bestellung weiter. Keine automatische Abbuchung.
           </div>
 
           <div className="rounded-2xl bg-[#F7F3E8] border border-black/5 p-4 text-sm leading-relaxed">
@@ -506,38 +479,15 @@ const PurchaseModal: React.FC<{ plan: StripePlan; onClose: () => void }> = ({ pl
 
           {error && <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm font-semibold text-red-700">{error}</div>}
 
-          {testResult && (
-            <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-sm text-emerald-950">
-              <div className="font-black mb-2">Testablauf</div>
-              <div>{testResult.message}</div>
-              <div className="mt-3 rounded-xl bg-white/70 p-3">
-                <div className="font-black">1. Zahlungsbestätigung</div>
-                <div>{testResult.payment_email_sent ? `Automatisch an ${testResult.recipient_email} versendet.` : 'Noch nicht versendet.'}</div>
-              </div>
-              <div className="mt-2 rounded-xl bg-white/70 p-3">
-                <div className="font-black">2. Rechnung nach Prüfung</div>
-                <div>{testResult.invoice_email_sent ? `Als zweite E-Mail an ${testResult.recipient_email} versendet.` : 'Wartet auf deine manuelle Freigabe.'}</div>
-                {testResult.pdf_url && <a href={testResult.pdf_url} target="_blank" rel="noreferrer" className="inline-block mt-2 font-black underline">Testrechnung vor der Freigabe öffnen</a>}
-              </div>
-              {!testResult.invoice_email_sent && (
-                <button type="button" onClick={sendReviewedInvoice} disabled={invoiceSending} className="mt-3 w-full rounded-xl bg-[#111318] px-4 py-3 text-xs font-black uppercase text-white disabled:opacity-50">
-                  {invoiceSending ? 'Testrechnung wird versendet…' : 'Geprüft: zweite Testmail senden'}
-                </button>
-              )}
-            </div>
-          )}
-
-          {!testResult && (
-            <button type="submit" disabled={loading} className="w-full rounded-xl bg-[#111318] text-white py-4 text-sm font-black uppercase tracking-wide disabled:opacity-50">
-              {loading ? 'Bestellung wird vorbereitet…' : (STRIPE_LINKS[plan] ? 'Weiter zur sicheren Zahlung' : 'Testzahlung simulieren')}
-            </button>
-          )}
-          <p className="text-[11px] text-black/40 text-center">
-            {STRIPE_LINKS[plan]
-              ? 'Die Zahlung wird anschließend über Stripe abgewickelt.'
-              : 'TESTMODUS: Es findet keine echte Zahlung statt. Die Testrechnung erhält keine echte Rechnungsnummer.'}
-          </p>
-        </form>
+          <label className="flex gap-3 items-start text-sm font-semibold">
+            <input required type="checkbox" checked={form.terms_accepted} onChange={e => setField('terms_accepted', e.target.checked)} className="mt-1" />
+            <span>Ich bestelle Core4X Pro für ein Jahr um 126,00 € und akzeptiere die <a href={`${APP_LEGAL_BASE}/terms.html`} target="_blank" rel="noreferrer" className="underline">AGB</a>. Ich wünsche den sofortigen Beginn der Nutzung. Zahlung innerhalb von sieben Tagen; ohne Zahlungsbestätigung wird auf Basic zurückgestellt.</span>
+          </label>
+          <button type="submit" disabled={loading} className="w-full rounded-xl bg-[#111318] text-white py-4 text-sm font-black uppercase tracking-wide disabled:opacity-50">
+            {loading ? 'Bestellung wird gespeichert…' : 'Zahlungspflichtig bestellen – 126 € / Jahr'}
+          </button>
+          <p className="text-[11px] text-black/40 text-center">Die Überweisung führst du selbst aus. Deine Bestellnummer dient als Verwendungszweck.</p>
+        </form>}
       </div>
     </div>
   )
@@ -601,12 +551,12 @@ const Preise: React.FC = () => {
         <PreisCard
           eyebrow="Pro"
           title="Für aktive Vereine"
-          price="129 €"
+          price="126 €"
           cadence="pro Jahr · statt 180 €"
           description="Der Haupttarif für Vereine, die Core4X regelmäßig operativ einsetzen."
           features={['Alle Basic-Funktionen', 'Mitglieder & Rollen', 'Kernteam & Einkauf', 'Rechnungen & Belege', 'Boniersystem / POS', 'Auswertungen & Archiv']}
           featured
-          badge="51 € Startvorteil"
+          badge="30 % Rabatt · 54 € sparen"
           action={<CheckoutButton plan="pro" light onCheckout={setCheckoutPlan}>Pro kaufen</CheckoutButton>}
         />
 
@@ -719,7 +669,7 @@ const Zukunft: React.FC = () => (
 
 const faqItems = [
   ['Kann ich kostenlos starten?', 'Ja. Basic ist für den Einstieg vorgesehen und kann ohne Jahreslizenz genutzt werden.'],
-  ['Was kostet Core4X Pro?', 'Der Einführungspreis beträgt 129 € pro Jahr statt regulär 180 €. Das entspricht einem Startvorteil von 51 €.'],
+  ['Was kostet Core4X Pro?', 'Der Einführungspreis beträgt 126 € pro Jahr statt regulär 180 €. Das entspricht einem Rabatt von 30 % (54 €).'],
   ['Was kostet Business?', 'Business kostet 59 € pro Monat und richtet sich an größere Organisationen mit erweiterten Strukturen.'],
   ['Was ist der 48h Event Pass?', 'Der 48h Event Pass kostet einmalig 60 € und schaltet die Eventfunktionen für 48 Stunden frei.'],
   ['Welche Zahlungsarten gibt es?', 'Der Checkout wird über Stripe abgewickelt. Je nach Land und Verfügbarkeit können unter anderem Karten, Apple Pay, Google Pay, PayPal, EPS und SEPA angeboten werden.'],
@@ -815,3 +765,4 @@ const App: React.FC = () => {
 }
 
 export default App
+
